@@ -1,0 +1,33 @@
+# vim:ft=nginx
+
+server {
+  listen 30666;
+  server_name *.dev;
+
+  if ($host ~* \.*([^.]+)\.dev$) {
+    set $appname $1;
+  }
+
+  root <%= APPS_DIR %>/$appname/public;
+
+  try_files /system/maintenance.html $uri/index.html $uri.html $uri @app;
+
+  # charset koi8-r;
+
+  # access_log  logs/$appname.access.log  main;
+
+  location @app {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_pass http://unix:<%= SOCKETS_DIR %>/$host.sock;
+    error_page 502 = @spawner;
+  }
+
+  error_page 404 /404.html;
+
+  location @spawner {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_pass http://unix:<%= SOCKETS_DIR %>/_.sock;
+  }
+}

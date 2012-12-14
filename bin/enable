@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ln -sfn ~/code/$1 ~/.yeb/$1
+
+echo "Enabled apps:"
+ls -1 ~/.yeb/

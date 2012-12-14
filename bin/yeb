@@ -1,0 +1,118 @@
+#!/usr/bin/env ruby
+
+$:.unshift './lib'
+
+require 'open3'
+require 'tmpdir'
+require 'socket'
+require 'fileutils'
+require 'erb'
+
+require 'yeb/spawn_server'
+
+DIR = File.expand_path("~/.yeb")
+NGINX_PREFIX = "#{DIR}/.nginx"
+NGINX_BIN = "#{NGINX_PREFIX}/sbin/nginx"
+SOCKETS_DIR = "#{DIR}/.sockets"
+APPS_DIR = DIR
+SERVER_SOCKET_PATH = "#{SOCKETS_DIR}/_.sock"
+HTTP_PORT = 30666
+HTTPS_PORT = 30667
+
+puts "creating dir #{DIR}"
+Dir.mkdir(DIR) unless File.directory?(DIR)
+Dir.mkdir(SOCKETS_DIR) unless File.directory?(SOCKETS_DIR)
+
+# TODO wget/curl
+puts "checking nginx"
+unless File.exist?("#{NGINX_PREFIX}/sbin/nginx")
+  puts 'installing nginx'
+  tmp_dir = Dir.mktmpdir
+  archive = File.expand_path('.stuff/nginx-1.2.5.tar.gz')
+  system(
+    "cd #{tmp_dir} && " \
+    "tar xf #{archive} && " \
+    "cd nginx-1.2.5 && " \
+    "./configure --prefix=#{NGINX_PREFIX} && " \
+    "make && " \
+    "make install && " \
+    "rm -rf #{tmp_dir}"
+  )
+end
+
+# TODO erb
+# unless File.exist?("#{NGINX_PREFIX}/conf/dynamic.conf")
+puts 'generate configs'
+
+tpl = ERB.new(File.read('nginx/conf/default-site.conf.erb'))
+File.open("#{NGINX_PREFIX}/conf/default-site.conf", "w") do |f|
+  f.write(tpl.result)
+end
+
+tpl = ERB.new(File.read('nginx/conf/dynamic-site.conf.erb'))
+File.open("#{NGINX_PREFIX}/conf/dynamic-site.conf", "w") do |f|
+  f.write(tpl.result)
+end
+
+
+  system(
+    "cp nginx/conf/nginx.conf #{NGINX_PREFIX}/conf/"
+  )
+# end
+
+# TODO: sudo?
+system("sudo ./bin/initd start") or raise "can't set FW forwarding"
+
+def run(cmd)
+  puts "running: #{cmd}"
+
+  exit_status = nil
+
+  Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
+    pid = wait_thr.pid # pid of the started process.
+    exit_status = wait_thr.value # Process::Status object returned.
+    puts "exited: #{cmd}"
+    puts stdout.read
+    puts stderr.read
+  end
+end
+
+@nginx_thread = Thread.new do
+  loop do
+    run NGINX_BIN
+    puts 'nginx died'
+  end
+end
+
+@nginx_thread.abort_on_exception = true
+
+def quit
+  @nginx_thread.exit
+  exit
+end
+
+trap("INT") do
+  puts 'inting'
+  quit
+  puts 'inted'
+end
+
+trap('TERM') do
+  puts 'terming'
+  quit
+  puts 'termed'
+end
+
+trap("QUIT") do
+  puts 'quitting'
+  quit
+  puts 'quited'
+end
+
+# trap("HUP") { handle_hup }
+
+# TODO
+class AppNotFoundError < StandardError; end
+class CantStartAppError < StandardError; end
+
+Yeb::SpawnServer.new(SERVER_SOCKET_PATH).listen

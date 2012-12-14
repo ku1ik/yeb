@@ -1,0 +1,9 @@
+# vim:ft=nginx
+
+server {
+  listen 30666;
+  server_name _;
+  root /home/kill/.yeb/default;
+  try_files /system/maintenance.html $uri/index.html $uri.html $uri;
+  error_page 404 /404.html;
+}
