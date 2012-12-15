@@ -59,11 +59,7 @@ File.open("#{NGINX_PREFIX}/conf/dynamic-site.conf", "w") do |f|
   f.write(tpl.result)
 end
 
-
-  system(
-    "cp nginx/conf/nginx.conf #{NGINX_PREFIX}/conf/"
-  )
-# end
+system("cp nginx/conf/nginx.conf #{NGINX_PREFIX}/conf/")
 
 # TODO: sudo?
 system("sudo ./bin/initd start") or raise "can't set FW forwarding"
