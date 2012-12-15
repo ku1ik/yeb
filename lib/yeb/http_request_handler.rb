@@ -1,8 +1,3 @@
-require 'yeb/app_manager'
-require 'yeb/response'
-require 'yeb/template'
-require 'yeb/hostname'
-
 module Yeb
   class HTTPRequestHandler
     attr_reader :app_manager

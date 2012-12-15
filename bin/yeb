@@ -8,6 +8,13 @@ require 'socket'
 require 'fileutils'
 require 'erb'
 
+require 'yeb/errors'
+require 'yeb/app'
+require 'yeb/app_manager'
+require 'yeb/response'
+require 'yeb/template'
+require 'yeb/hostname'
+require 'yeb/http_request_handler'
 require 'yeb/spawn_server'
 
 DIR = File.expand_path("~/.yeb")

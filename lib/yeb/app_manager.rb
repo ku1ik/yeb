@@ -1,5 +1,3 @@
-require 'yeb/app'
-
 module Yeb
   class AppManager
 
