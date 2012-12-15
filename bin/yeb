@@ -47,8 +47,6 @@ unless File.exist?("#{NGINX_PREFIX}/sbin/nginx")
   )
 end
 
-# TODO erb
-# unless File.exist?("#{NGINX_PREFIX}/conf/dynamic.conf")
 puts 'generate configs'
 
 tpl = ERB.new(File.read('nginx/conf/default-site.conf.erb'))
@@ -117,7 +115,5 @@ trap("QUIT") do
 end
 
 # trap("HUP") { handle_hup }
-
-# TODO
 
 Yeb::SpawnServer.new(SERVER_SOCKET_PATH).listen
