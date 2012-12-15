@@ -112,7 +112,5 @@ end
 # trap("HUP") { handle_hup }
 
 # TODO
-class AppNotFoundError < StandardError; end
-class CantStartAppError < StandardError; end
 
 Yeb::SpawnServer.new(SERVER_SOCKET_PATH).listen

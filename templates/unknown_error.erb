@@ -1,6 +1,6 @@
-<h2><%= exception.class.to_s.gsub('<', '&lt;') %></h2>
+<h2>Shit! Internal Yeb Error</h2>
 
-<h3><%= exception.message.gsub('<', '&lt;') %></h3>
+<h3><%= exception.class.to_s.gsub('<', '&lt;') + ': ' + exception.message.gsub('<', '&lt;') %></h3>
 
 <pre>
 <%= exception.backtrace.join("\n").gsub('<', '&lt;') %>

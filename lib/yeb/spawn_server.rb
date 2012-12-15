@@ -1,4 +1,5 @@
 require 'socket'
+require 'yeb/errors'
 require 'yeb/http_request_handler'
 
 module Yeb

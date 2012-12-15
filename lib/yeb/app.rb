@@ -1,11 +1,19 @@
 module Yeb
   class App
-    def initialize(name)
-      @name = name
+    attr_reader :name, :dir, :socket_path
+
+    def self.name_from_hostname(hostname)
+      hostname.root[/^(.+)\.dev$/, 1]
     end
 
-    def spawn(dir, socket_path)
-      puts "spawning app #{@name} in #{dir}"
+    def initialize(name, dir, socket_path)
+      @name = name
+      @dir = dir
+      @socket_path = socket_path
+    end
+
+    def spawn
+      puts "spawning app #{name} in #{dir}"
 
       @stdin, @stdout, @stderr, @wait_thr =
         Open3.popen3("sh -l -c 'exec thin start -S #{socket_path}'", :chdir => dir)
@@ -17,17 +25,20 @@ module Yeb
         sleep 1
       end
 
-      File.exist?(socket_path)
-    rescue => e
-      # puts e
-      # puts e.message
-      # puts e.backtrace
+      unless File.exist?(socket_path)
+        stdout = @stdout.read + @stderr.read
+        raise AppStartFailedError.new(name, stdout)
+      end
     end
 
-    # def shutdown
+    def shutdown
     #   @stdout.close
     #   @stderr.close
     #   @wait_thr.kill
-    # end
+    end
+
+    def socket
+      UNIXSocket.new(socket_path)
+    end
   end
 end
