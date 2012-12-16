@@ -150,10 +150,11 @@ describe Yeb::VirtualHost do
     let(:app) { double('app') }
 
     it 'creates new instance of App and calls #spawn on it' do
-      App.should_receive(:new).with(app_name, dir, socket_path).and_return(app)
+      vhost.stub!(:app_name => app_name, :app_real_path => dir, :app_socket_path => socket_path)
+      Yeb::App.should_receive(:new).with(app_name, dir, socket_path).and_return(app)
       app.should_receive(:spawn)
 
-      vhost.spawn
+      vhost.spawn_app
     end
   end
 end
