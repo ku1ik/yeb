@@ -33,9 +33,5 @@ module Yeb
     #   @stderr.close
     #   @wait_thr.kill
     end
-
-    def socket
-      UNIXSocket.new(socket_path)
-    end
   end
 end
