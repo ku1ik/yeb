@@ -24,7 +24,7 @@ module Yeb
         })
       end
 
-    rescue AppNotRecognized => e
+    rescue AppNotRecognizedError => e
       Response.new do |r|
         r.status = 404
         r.body = Template.render(:app_not_recognized_error, {

@@ -9,6 +9,7 @@ module Yeb
     end
 
     def spawn
+      raise AppNotRecognizedError.new(name) unless File.exist?("#{dir}/config.ru")
       puts "spawning app #{name} in #{dir}"
 
       @stdin, @stdout, @stderr, @wait_thr =

@@ -17,4 +17,6 @@ module Yeb
       @stdout = stdout
     end
   end
+
+  class AppNotRecognizedError < Error; end
 end
