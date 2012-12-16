@@ -8,10 +8,6 @@ server {
     set $app_name $1;
   }
 
-  if ($host ~* \.*([^.]+\.dev)$) {
-    set $root_host $1;
-  }
-
   root <%= APPS_DIR %>/$app_name/public;
 
   try_files /system/maintenance.html $uri/index.html $uri.html $uri @app;
@@ -23,15 +19,15 @@ server {
   location @app {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header Host $http_host;
-    proxy_pass http://unix:<%= SOCKETS_DIR %>/$root_host.sock;
+    proxy_pass http://unix:<%= SOCKETS_DIR %>/$host.sock;
     error_page 502 = @spawner;
   }
-
-  error_page 404 /404.html;
 
   location @spawner {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header Host $http_host;
     proxy_pass http://unix:<%= SERVER_SOCKET_PATH %>;
   }
+
+  error_page 404 /404.html;
 }
