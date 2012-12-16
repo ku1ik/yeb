@@ -11,7 +11,13 @@ module Yeb
     end
 
     def root
-      name[/(.+\.)?([^\.]+\.dev)$/, 2]
+      root_name = name[/(.+\.)?([^\.]+\.[a-z]+)$/, 2]
+
+      if root_name == name
+        self
+      else
+        Hostname.new(root_name)
+      end
     end
   end
 end
