@@ -2,10 +2,6 @@ module Yeb
   class App
     attr_reader :name, :dir, :socket_path
 
-    def self.name_from_hostname(hostname)
-      hostname.root[/^(.+)\.dev$/, 1]
-    end
-
     def initialize(name, dir, socket_path)
       @name = name
       @dir = dir
