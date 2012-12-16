@@ -1,15 +1,16 @@
 module Yeb
   class HTTPRequestHandler
-    attr_reader :app_manager
+    attr_reader :apps_dir, :sockets_dir
 
-    def initialize
-      @app_manager = AppManager.new
+    def initialize(apps_dir, sockets_dir)
+      @apps_dir = apps_dir
+      @sockets_dir = sockets_dir
     end
 
     def get_response(request)
       hostname = Hostname.from_http_request(request)
-      app = app_manager.get_app_for_hostname(hostname)
-      socket = app.socket
+      vhost = VirtualHost.new(hostname, apps_dir, sockets_dir)
+      socket = vhost.socket
       socket.send(request, 0)
       response = socket.recv(4 * 1024 * 1024)
       socket.close
