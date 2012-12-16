@@ -19,5 +19,13 @@ module Yeb
         Hostname.new(root_name)
       end
     end
+
+    def app_name
+      name[/^(.+)\.[a-z]+$/, 1]
+    end
+
+    def to_s
+      name
+    end
   end
 end
