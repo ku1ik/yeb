@@ -1,9 +1,10 @@
 require 'spec_helper'
-require 'yeb/spawn_server'
 
 describe Yeb::SpawnServer do
   let(:socket_path) { '/tmp/.yeb-test.sock' }
-  let(:server) { Yeb::SpawnServer.new(socket_path) }
+  let(:apps_dir) { Dir.mktmpdir }
+  let(:sockets_dir) { Dir.mktmpdir }
+  let(:server) { Yeb::SpawnServer.new(socket_path, apps_dir, sockets_dir) }
 
   before { FileUtils.rm_rf(socket_path) }
 
@@ -41,7 +42,7 @@ describe Yeb::SpawnServer do
       client_socket.should_receive(:recv).and_return(request_body)
 
       handler = double('HTTPRequestHandler')
-      response = double('response')
+      response = double('response').to_s
       handler.stub!(:get_response => response)
       Yeb::HTTPRequestHandler.should_receive(:new).and_return(handler)
 

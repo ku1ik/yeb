@@ -2,9 +2,9 @@ require 'socket'
 
 module Yeb
   class SpawnServer
-    def initialize(socket_path)
+    def initialize(socket_path, apps_dir, sockets_dir)
       @socket_path = socket_path
-      @request_handler = HTTPRequestHandler.new
+      @request_handler = HTTPRequestHandler.new(apps_dir, sockets_dir)
     end
 
     def listen
