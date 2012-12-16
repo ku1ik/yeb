@@ -105,4 +105,4 @@ end
 
 # trap("HUP") { handle_hup }
 
-Yeb::SpawnServer.new(SERVER_SOCKET_PATH).listen
+Yeb::SpawnServer.new(SERVER_SOCKET_PATH, APPS_DIR, SOCKETS_DIR).listen
