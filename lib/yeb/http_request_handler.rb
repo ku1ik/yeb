@@ -37,7 +37,9 @@ module Yeb
         r.status = 502
         r.body = Template.render(:app_start_failed_error, {
           :app_name => e.app_name,
-          :stdout => e.stdout
+          :stdout => e.stdout,
+          :stderr => e.stderr,
+          :env => e.env
         })
       end
 

@@ -10,11 +10,13 @@ module Yeb
   class AppNotFoundError < Error; end
 
   class AppStartFailedError < Error
-    attr_reader :stdout
+    attr_reader :stdout, :stderr, :env
 
-    def initialize(app_name, stdout)
+    def initialize(app_name, stdout, stderr, env)
       super(app_name)
       @stdout = stdout
+      @stderr = stderr
+      @env = env
     end
   end
 
