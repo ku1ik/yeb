@@ -13,6 +13,7 @@ require 'yeb'
 DIR = File.expand_path("~/.yeb")
 NGINX_PREFIX = "#{DIR}/.nginx"
 NGINX_BIN = "#{NGINX_PREFIX}/sbin/nginx"
+NGINX_STATIC_ASSETS = File.expand_path('../../nginx/static', __FILE__)
 SOCKETS_DIR = "#{DIR}/.sockets"
 APPS_DIR = DIR
 SERVER_SOCKET_PATH = "#{SOCKETS_DIR}/_.sock"
