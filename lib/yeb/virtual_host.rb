@@ -76,7 +76,7 @@ module Yeb
     end
 
     def spawn_app
-      app = App.new(app_name, app_real_path, app_socket_path)
+      app = RackApp.new(app_name, app_real_path, app_socket_path)
       app.spawn
     end
   end
