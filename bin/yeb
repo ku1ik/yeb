@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+# TODO: remove below when ready for gem packaging
 $:.unshift './lib'
 
 require 'open3'
@@ -10,6 +11,7 @@ require 'erb'
 
 require 'yeb'
 
+# TODO: move below to Yeb::Configuration
 DIR = File.expand_path("~/.yeb")
 NGINX_PREFIX = "#{DIR}/.nginx"
 NGINX_BIN = "#{NGINX_PREFIX}/sbin/nginx"
@@ -24,16 +26,16 @@ puts "creating dir #{DIR}"
 Dir.mkdir(DIR) unless File.directory?(DIR)
 Dir.mkdir(SOCKETS_DIR) unless File.directory?(SOCKETS_DIR)
 
-# TODO wget/curl
 puts "checking nginx"
 unless File.exist?("#{NGINX_PREFIX}/sbin/nginx")
   puts 'installing nginx'
   tmp_dir = Dir.mktmpdir
-  archive = File.expand_path('.stuff/nginx-1.2.5.tar.gz')
+  download_url = "http://nginx.org/download/nginx-1.2.6.tar.gz"
   system(
     "cd #{tmp_dir} && " \
-    "tar xf #{archive} && " \
-    "cd nginx-1.2.5 && " \
+    "wget #{download_url} && " \
+    "tar xf nginx-1.2.6.tar.gz && " \
+    "cd nginx-1.2.6 && " \
     "./configure --prefix=#{NGINX_PREFIX} && " \
     "make && " \
     "make install && " \
@@ -41,6 +43,7 @@ unless File.exist?("#{NGINX_PREFIX}/sbin/nginx")
   )
 end
 
+# TODO: move it to Yeb::Configuration
 puts 'generate configs'
 
 tpl = ERB.new(File.read('nginx/conf/default-site.conf.erb'))
@@ -55,7 +58,7 @@ end
 
 system("cp nginx/conf/nginx.conf #{NGINX_PREFIX}/conf/")
 
-# TODO: sudo?
+# TODO: sudo really needed?
 system("sudo ./bin/initd start") or raise "can't set FW forwarding"
 
 def run(cmd)
