@@ -1,5 +1,6 @@
 module Yeb
   class Hostname
+    TLD_WILDCARDS = "*.dev *.lvh.me *.xip.io"
     TLD_REGEXP = /dev|lvh\.me|(\d{1,3}\.){4}xip\.io/
 
     attr_reader :name
