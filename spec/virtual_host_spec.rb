@@ -92,7 +92,13 @@ describe Yeb::VirtualHost do
   describe '#socket_path' do
     subject { vhost.socket_path }
 
-    it { should == "#{sockets_dir}/#{hostname}.sock" }
+    let(:app_name) { double }
+
+    before do
+      hostname.stub!(:app_name => app_name.to_s)
+    end
+
+    it { should == "#{sockets_dir}/#{app_name}.sock" }
   end
 
   describe '#app_socket_path' do

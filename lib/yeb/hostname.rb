@@ -1,5 +1,7 @@
 module Yeb
   class Hostname
+    TLD_REGEXP = /dev|lvh\.me|(\d{1,3}\.){4}xip\.io/
+
     attr_reader :name
 
     def self.from_http_request(request)
@@ -11,7 +13,7 @@ module Yeb
     end
 
     def root
-      root_name = name[/(.+\.)?([^\.]+\.[a-z]+)$/, 2]
+      root_name = name[/(.+\.)?([^\.]+\.(#{TLD_REGEXP}))$/, 2]
 
       if root_name == name
         self
@@ -21,7 +23,7 @@ module Yeb
     end
 
     def app_name
-      name[/^(.+)\.[a-z]+$/, 1]
+      name[/^(.+)\.(#{TLD_REGEXP})$/, 1]
     end
 
     def to_s

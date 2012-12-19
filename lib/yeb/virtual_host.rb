@@ -42,7 +42,7 @@ module Yeb
     end
 
     def socket_path
-      "#{sockets_dir}/#{hostname}.sock"
+      "#{sockets_dir}/#{hostname.app_name}.sock"
     end
 
     def app_socket_path
