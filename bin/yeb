@@ -61,6 +61,8 @@ system("cp nginx/conf/nginx.conf #{NGINX_PREFIX}/conf/")
 # TODO: sudo really needed?
 system("sudo ./bin/initd start") or raise "can't set FW forwarding"
 
+# TODO: clear old sockets / symlinks
+
 def run(cmd)
   puts "running: #{cmd}"
 
