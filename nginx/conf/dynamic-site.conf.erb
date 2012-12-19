@@ -14,7 +14,7 @@ server {
 
   # charset koi8-r;
 
-  # access_log  logs/$appname.access.log  main;
+  access_log logs/$app_name.access.log;
 
   if ($host ~* "^(.*)\.(dev|lvh\.me|(\d{1,3}\.){4}xip\.io)$") {
     set $socket_name $1;
