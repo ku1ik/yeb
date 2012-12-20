@@ -21,10 +21,9 @@ describe Yeb::SpawnServer do
 
     it 'removes stale socket file' do
       FileUtils.touch(socket_path)
-      old_inode = File.stat(socket_path).ino
+      UNIXServer.stub!(:new => nil)
       server.listen
-      new_inode = File.stat(socket_path).ino
-      new_inode.should_not == old_inode
+      File.exist?(socket_path).should be(false)
     end
 
     it 'calls Socket.accept_loop with server socket' do
