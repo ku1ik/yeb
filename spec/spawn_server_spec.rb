@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'yeb/spawn_server'
 
 describe Yeb::SpawnServer do
   let(:socket_path) { '/tmp/.yeb-test.sock' }

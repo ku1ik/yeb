@@ -1,3 +1,8 @@
+require 'yeb/hostname'
+require 'yeb/virtual_host'
+require 'yeb/response'
+require 'yeb/template'
+
 module Yeb
   class HTTPRequestHandler
     attr_reader :apps_dir, :sockets_dir

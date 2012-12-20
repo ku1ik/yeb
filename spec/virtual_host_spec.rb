@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'tempfile'
+require 'yeb/virtual_host'
 
 describe Yeb::VirtualHost do
   let(:apps_dir) { Dir.mktmpdir }

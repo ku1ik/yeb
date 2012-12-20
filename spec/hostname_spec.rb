@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'yeb/hostname'
 
 describe Yeb::Hostname do
   let(:hostname) { Yeb::Hostname.new('bar.foo.dev') }

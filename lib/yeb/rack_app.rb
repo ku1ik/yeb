@@ -1,3 +1,7 @@
+require 'yeb/command'
+require 'yeb/process'
+require 'yeb/error'
+
 module Yeb
   class RackApp
     @@apps = {}
@@ -52,4 +56,17 @@ module Yeb
       process.stdout + process.stderr
     end
   end
+
+  class AppStartFailedError < Error
+    attr_reader :stdout, :stderr, :env
+
+    def initialize(app_name, stdout, stderr, env)
+      super(app_name)
+      @stdout = stdout
+      @stderr = stderr
+      @env = env
+    end
+  end
+
+  class AppNotRecognizedError < Error; end
 end

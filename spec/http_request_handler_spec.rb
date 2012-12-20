@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'yeb/http_request_handler'
 
 describe Yeb::HTTPRequestHandler do
   let(:apps_dir) { Dir.mktmpdir }

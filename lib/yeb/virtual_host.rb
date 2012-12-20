@@ -1,6 +1,9 @@
 require 'pathname'
 require 'digest/sha1'
 
+require 'yeb/rack_app'
+require 'yeb/error'
+
 module Yeb
   class VirtualHost
     attr_reader :hostname, :apps_dir, :sockets_dir
@@ -80,4 +83,6 @@ module Yeb
       app.spawn
     end
   end
+
+  class AppNotFoundError < Error; end
 end

@@ -9,8 +9,6 @@ require 'socket'
 require 'fileutils'
 require 'erb'
 
-require 'yeb'
-
 # TODO: move below to Yeb::Configuration
 DIR = File.expand_path("~/.yeb")
 NGINX_PREFIX = "#{DIR}/.nginx"
@@ -45,6 +43,8 @@ end
 
 # TODO: move it to Yeb::Configuration
 puts 'generate configs'
+
+require 'yeb/hostname'
 
 tpl = ERB.new(File.read('nginx/conf/default-site.conf.erb'))
 File.open("#{NGINX_PREFIX}/conf/default-site.conf", "w") do |f|
@@ -111,4 +111,5 @@ end
 
 # trap("HUP") { handle_hup }
 
+require 'yeb/spawn_server'
 Yeb::SpawnServer.new(SERVER_SOCKET_PATH, APPS_DIR, SOCKETS_DIR).listen

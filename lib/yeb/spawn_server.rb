@@ -1,5 +1,7 @@
 require 'socket'
 
+require 'yeb/http_request_handler'
+
 module Yeb
   class SpawnServer
     def initialize(socket_path, apps_dir, sockets_dir)
