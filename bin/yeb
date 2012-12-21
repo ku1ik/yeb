@@ -15,6 +15,7 @@ NGINX_PREFIX = "#{DIR}/.nginx"
 NGINX_BIN = "#{NGINX_PREFIX}/sbin/nginx"
 NGINX_STATIC_ASSETS = File.expand_path('../../nginx/static', __FILE__)
 SOCKETS_DIR = "#{DIR}/.sockets"
+VHOSTS_DIR = "#{DIR}/.vhosts"
 APPS_DIR = DIR
 SERVER_SOCKET_PATH = "#{SOCKETS_DIR}/_.sock"
 HTTP_PORT = 30666
@@ -23,6 +24,9 @@ HTTPS_PORT = 30667
 puts "creating dir #{DIR}"
 Dir.mkdir(DIR) unless File.directory?(DIR)
 Dir.mkdir(SOCKETS_DIR) unless File.directory?(SOCKETS_DIR)
+
+Dir.mkdir(VHOSTS_DIR) unless File.directory?(VHOSTS_DIR)
+FileUtils.rm Dir.glob("#{VHOSTS_DIR}/*")
 
 puts "checking nginx"
 unless File.exist?("#{NGINX_PREFIX}/sbin/nginx")
@@ -56,7 +60,10 @@ File.open("#{NGINX_PREFIX}/conf/dynamic-site.conf", "w") do |f|
   f.write(tpl.result)
 end
 
-system("cp nginx/conf/nginx.conf #{NGINX_PREFIX}/conf/")
+tpl = ERB.new(File.read('nginx/conf/nginx.conf.erb'))
+File.open("#{NGINX_PREFIX}/conf/nginx.conf", "w") do |f|
+  f.write(tpl.result)
+end
 
 # TODO: sudo really needed?
 system("sudo ./bin/initd start") or raise "can't set FW forwarding"
@@ -112,4 +119,4 @@ end
 # trap("HUP") { handle_hup }
 
 require 'yeb/spawn_server'
-Yeb::SpawnServer.new(SERVER_SOCKET_PATH, APPS_DIR, SOCKETS_DIR).listen
+Yeb::SpawnServer.new(SERVER_SOCKET_PATH, APPS_DIR).listen

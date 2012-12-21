@@ -1,25 +1,21 @@
 require 'yeb/hostname'
-require 'yeb/virtual_host'
+require 'yeb/app_manager'
 require 'yeb/response'
 require 'yeb/template'
 
 module Yeb
-  class HTTPRequestHandler
-    attr_reader :apps_dir, :sockets_dir
+  class RequestHandler
+    attr_reader :app_manager
 
-    def initialize(apps_dir, sockets_dir)
-      @apps_dir = apps_dir
-      @sockets_dir = sockets_dir
+    def initialize(apps_dir)
+      @app_manager = AppManager.new(apps_dir)
     end
 
-    def get_response(request)
+    def handle(request)
       hostname = Hostname.from_http_request(request)
-      vhost = VirtualHost.new(hostname, apps_dir, sockets_dir)
-      socket = vhost.socket
-      socket.send(request, 0)
-      response = socket.recv(4 * 1024 * 1024)
-      socket.close
-      response
+      app = app_manager.get_app(hostname)
+      app.write_vhost_file(hostname)
+      return app.handle(request)
 
     rescue AppNotFoundError => e
       Response.new do |r|

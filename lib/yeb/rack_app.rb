@@ -1,42 +1,41 @@
+require 'yeb/app'
 require 'yeb/command'
 require 'yeb/process'
+require 'yeb/template'
 require 'yeb/error'
 
 module Yeb
-  class RackApp
-    @@apps = {}
+  class RackApp < App
+    attr_reader :path, :port
 
-    attr_reader :name, :dir, :socket_path
+    def initialize(name, path, port)
+      super(name)
+      @path = path
+      @port = port
+    end
 
-    def initialize(name, dir, socket_path)
-      @name = name
-      @dir = dir
-      @socket_path = socket_path
-      @@apps[name] = self # need to prevent garbage collection and closing of @stdout and @stderr
+    def connect
+      TCPSocket.new('localhost', port)
     end
 
     def spawn
-      puts "spawning app #{name} in #{dir}"
+      puts "Spawning Rack app #{name} in #{path}"
 
-      @process = Process.new(command)
-      @process.start
+      process = Process.new(command)
+      process.start
 
-      while @process.alive? && !File.exist?(socket_path)
-        puts "waiting for #{socket_path}"
+      while process.alive? && !socket_ready?
+        puts "waiting for port #{port} to accept connections"
         sleep 1
       end
 
-      unless File.exist?(socket_path)
-        raise AppStartFailedError.new(name, @process.stdout, @process.stderr, env)
+      unless socket_ready?
+        raise AppStartFailedError.new(name, process.stdout, process.stderr, env)
       end
     end
 
     def command
-      if File.exist?("#{dir}/config.ru")
-        Command.new("#{thin} start -S #{socket_path}", dir)
-      else
-        raise AppNotRecognizedError.new(name)
-      end
+      Command.new("#{thin} start -p #{port}", path)
     end
 
     def thin
@@ -55,6 +54,20 @@ module Yeb
       process.start
       process.stdout + process.stderr
     end
+
+    def write_vhost_file(hostname)
+      context = {
+        :app_name => name,
+        :hostname => hostname.to_s,
+        :port => port
+      }
+
+      data = ERBTemplate.render('nginx/conf/forwarded-site.conf.erb', context)
+
+      File.open("#{VHOSTS_DIR}/#{name}.conf", 'w') do |f|
+        f.write(data)
+      end
+    end
   end
 
   class AppStartFailedError < Error
@@ -67,6 +80,4 @@ module Yeb
       @env = env
     end
   end
-
-  class AppNotRecognizedError < Error; end
 end

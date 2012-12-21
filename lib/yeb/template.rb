@@ -2,15 +2,18 @@ require 'erb'
 require 'ostruct'
 
 module Yeb
-  class Template
-    def self.render(name, context = {})
+  class ERBTemplate
+    def self.render(path, context = {})
       b = OpenStruct.new(context).instance_eval { binding }
+      template = File.read(path)
+      ERB.new(template).result(b)
+    end
+  end
 
-      template = File.read("templates/layout.erb")
-      layout = ERB.new(template).result(b)
-
-      template = File.read("templates/#{name}.erb")
-      content = ERB.new(template).result(b)
+  class Template
+    def self.render(path, context = {})
+      layout = ERBTemplate.render("templates/layout.erb", context)
+      content = ERBTemplate.render("templates/#{path}.erb", context)
 
       layout.sub!('<!-- content -->', content) # cheating!
       layout.gsub!(/<!--# include file="([^"]+)" -->/) do |match|
@@ -21,10 +24,6 @@ module Yeb
 
     rescue
       'Shit.'
-    end
-
-    def self.resource_path(name)
-      File.expand_path("../../../#{name}", __FILE__)
     end
   end
 end
