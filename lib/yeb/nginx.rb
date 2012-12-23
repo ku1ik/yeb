@@ -85,12 +85,20 @@ module Yeb
       end
     end
 
-    def write_vhost_file(app_type, vhost_name, context)
+    def add_vhost_file(vhost_name, app_type, context)
       data = ERBTemplate.render("nginx/conf/app_types/#{app_type}.conf.erb", context)
 
-      File.open("#{vhosts_dir}/#{vhost_name}.conf", 'w') do |f|
+      File.open(vhost_file_path(vhost_name), 'w') do |f|
         f.write(data)
       end
+    end
+
+    def remove_vhost_file(vhost_name)
+      FileUtils.rm_rf(vhost_file_path(vhost_name))
+    end
+
+    def vhost_file_path(vhost_name)
+      "#{vhosts_dir}/#{vhost_name}.conf"
     end
   end
 end

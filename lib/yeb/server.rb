@@ -38,6 +38,7 @@ module Yeb
       response = nil
       request = client_socket.recv(4096 * 1024)
       hostname = Hostname.from_http_request(request)
+      remove_nginx_vhost(hostname)
       app = app_manager.get_app(hostname)
       response = app.call(request)
       add_nginx_vhost(hostname, app)
@@ -77,6 +78,7 @@ module Yeb
       end
 
     ensure
+      nginx.reload
       client_socket.send(response.to_s, 0)
       client_socket.close
     end
@@ -90,8 +92,11 @@ module Yeb
 
       context.merge!(app.vhost_context)
 
-      nginx.write_vhost_file(app.type, hostname.app_name, context)
-      nginx.reload
+      nginx.add_vhost_file(hostname.app_name, app.type, context)
+    end
+
+    def remove_nginx_vhost(hostname)
+      nginx.remove_vhost_file(hostname.app_name)
     end
 
     def stop
