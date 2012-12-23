@@ -31,18 +31,9 @@ module Yeb
       cmd = bin_path
 
       @thread = Thread.new do
-        loop do
-          Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-            pid = wait_thr.pid # pid of the started process.
-            exit_status = wait_thr.value # Process::Status object returned.
-            puts "exited: #{cmd}"
-            puts stdout.read
-            puts stderr.read
-          end
-
-          puts 'nginx died'
-          sleep 1
-        end
+        i, o, e, @nginx_wait_thr = Open3.popen3(cmd)
+        @nginx_wait_thr.value # wait for process to finish
+        puts "NGiNX exited"
       end
 
       @thread.abort_on_exception = true
@@ -53,7 +44,8 @@ module Yeb
     end
 
     def reload
-
+      puts 'reloading nginx'
+      ::Process.kill('HUP', @nginx_wait_thr.pid)
     end
 
     def install
