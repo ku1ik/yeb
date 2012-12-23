@@ -3,11 +3,6 @@
 # TODO: remove below when ready for gem packaging
 $:.unshift './lib'
 
-require 'open3'
-require 'tmpdir'
-require 'socket'
-require 'fileutils'
-require 'erb'
 
 # TODO: move below to Yeb::Configuration
 DIR = File.expand_path("~/.yeb")
@@ -25,98 +20,8 @@ puts "creating dir #{DIR}"
 Dir.mkdir(DIR) unless File.directory?(DIR)
 Dir.mkdir(SOCKETS_DIR) unless File.directory?(SOCKETS_DIR)
 
-Dir.mkdir(VHOSTS_DIR) unless File.directory?(VHOSTS_DIR)
-FileUtils.rm Dir.glob("#{VHOSTS_DIR}/*")
-
-puts "checking nginx"
-unless File.exist?("#{NGINX_PREFIX}/sbin/nginx")
-  puts 'installing nginx'
-  tmp_dir = Dir.mktmpdir
-  download_url = "http://nginx.org/download/nginx-1.2.6.tar.gz"
-  system(
-    "cd #{tmp_dir} && " \
-    "wget #{download_url} && " \
-    "tar xf nginx-1.2.6.tar.gz && " \
-    "cd nginx-1.2.6 && " \
-    "./configure --prefix=#{NGINX_PREFIX} && " \
-    "make && " \
-    "make install && " \
-    "rm -rf #{tmp_dir}"
-  )
-end
-
-# TODO: move it to Yeb::Configuration
-puts 'generate configs'
-
-require 'yeb/hostname'
-
-tpl = ERB.new(File.read('nginx/conf/default-site.conf.erb'))
-File.open("#{NGINX_PREFIX}/conf/default-site.conf", "w") do |f|
-  f.write(tpl.result)
-end
-
-tpl = ERB.new(File.read('nginx/conf/dynamic-site.conf.erb'))
-File.open("#{NGINX_PREFIX}/conf/dynamic-site.conf", "w") do |f|
-  f.write(tpl.result)
-end
-
-tpl = ERB.new(File.read('nginx/conf/nginx.conf.erb'))
-File.open("#{NGINX_PREFIX}/conf/nginx.conf", "w") do |f|
-  f.write(tpl.result)
-end
-
 # TODO: sudo really needed?
 system("sudo ./bin/initd start") or raise "can't set FW forwarding"
 
-# TODO: clear old sockets / symlinks
-
-def run(cmd)
-  puts "running: #{cmd}"
-
-  exit_status = nil
-
-  Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-    pid = wait_thr.pid # pid of the started process.
-    exit_status = wait_thr.value # Process::Status object returned.
-    puts "exited: #{cmd}"
-    puts stdout.read
-    puts stderr.read
-  end
-end
-
-@nginx_thread = Thread.new do
-  loop do
-    run NGINX_BIN
-    puts 'nginx died'
-  end
-end
-
-@nginx_thread.abort_on_exception = true
-
-def quit
-  @nginx_thread.exit
-  exit
-end
-
-trap("INT") do
-  puts 'inting'
-  quit
-  puts 'inted'
-end
-
-trap('TERM') do
-  puts 'terming'
-  quit
-  puts 'termed'
-end
-
-trap("QUIT") do
-  puts 'quitting'
-  quit
-  puts 'quited'
-end
-
-# trap("HUP") { handle_hup }
-
 require 'yeb/daemon'
-Yeb::Daemon.new(SERVER_SOCKET_PATH, APPS_DIR).run
+Yeb::Daemon.new(SERVER_SOCKET_PATH, APPS_DIR).start
