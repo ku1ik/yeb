@@ -11,7 +11,7 @@ server {
 
   # handle all requests with yeb spawner
   include _spawner.conf;
-  try_files /system/maintenance.html @spawner;
+  try_files $uri/fail @spawner;
 
   if ($host ~* "\.*([^.]+)\.(<%= Yeb::Hostname::TLD_REGEXP.source %>)$") {
     set $app_name $1;
