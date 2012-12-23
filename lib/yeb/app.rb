@@ -20,7 +20,7 @@ module Yeb
       socket = connect
       socket.close
       true
-    rescue Errno::ECONNREFUSED
+    rescue Errno::ECONNREFUSED, Errno::ENOENT
       false
     end
 
@@ -39,13 +39,19 @@ module Yeb
     end
 
     def dispose
-      raise NotImplementedError
+      # no op
     end
 
     def vhost_context
-      raise NotImplementedError
+      { :path => path }
     end
   end
 
-  class NotImplementedError < Error; end
+  class NotImplementedError < StandardError; end
+
+  class AppConnectError < AppError
+    def template_name
+      self.class.to_s.split('::').last.gsub(/([a-z])([A-Z])/, "\\1_\\2").downcase
+    end
+  end
 end

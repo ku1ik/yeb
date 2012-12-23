@@ -3,9 +3,9 @@ require 'ostruct'
 
 module Yeb
   class ERBTemplate
-    def self.render(path, context = {})
+    def self.render(_path, context = {})
       b = OpenStruct.new(context).instance_eval { binding }
-      template = File.read(path)
+      template = File.read(_path)
       ERB.new(template).result(b)
     end
   end
@@ -22,7 +22,9 @@ module Yeb
 
       layout
 
-    rescue
+    rescue => e
+      puts e
+      puts e.backtrace.join("\n")
       'Shit.'
     end
   end

@@ -3,17 +3,17 @@
 <p>STDERR:</p>
 
 <pre>
-<%= stderr %>
+<%= exception.stderr.gsub('<', '&lt;') %>
 </pre>
 
 <p>STDOUT:</p>
 
 <pre>
-<%= stdout %>
+<%= exception.stdout.gsub('<', '&lt;') %>
 </pre>
 
 <p>ENV:</p>
 
 <pre>
-<%= env %>
+<%= exception.env.gsub('<', '&lt;') %>
 </pre>

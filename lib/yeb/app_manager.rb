@@ -1,4 +1,6 @@
 require 'yeb/rack_app'
+require 'yeb/tcp_socket_proxy'
+require 'yeb/unix_socket_proxy'
 require 'yeb/error'
 require 'pathname'
 
@@ -25,7 +27,7 @@ module Yeb
 
         unless apps[name]
           puts 'creating new app'
-          path = get_app_symlink_path(hostname)
+          path = get_app_path(hostname)
           apps[name] = create_app(name, path)
         end
 
@@ -36,7 +38,11 @@ module Yeb
     end
 
     def create_app(name, path)
-      real_path = Pathname.new(path).realpath.to_s
+      begin
+        real_path = Pathname.new(path).realpath.to_s
+      rescue Errno::ENOENT
+        raise AppSymlinkInvalidError.new(name, path)
+      end
 
       if File.directory?(real_path)
         if File.exist?("#{real_path}/config.ru")
@@ -54,9 +60,18 @@ module Yeb
       elsif File.file?(real_path)
         upstream = File.read(real_path).strip
 
-        if upstream =~ /^\d+$/
-          port = upstream.to_i
-          app = TcpSocketProxy.new(name, real_path, port)
+        if upstream =~ /^[a-z0-9:.-]+$/
+          if upstream =~ /^\d+$/
+            host = 'localhost'
+            port = upstream.to_i
+          elsif upstream =~ /^([\w-]+\.?)+(:\d+)?$/
+            host, port = upstream.split(':')
+            port ||= 80
+          else
+            raise 'Bad tcp proxy endpoint format'
+          end
+
+          app = TcpSocketProxy.new(name, real_path, host, port)
           app.spawn
         else
           raise AppNotRecognizedError.new(name, path)
@@ -70,23 +85,23 @@ module Yeb
     end
 
     def get_app_name(hostname)
-      if path = get_app_symlink_path(hostname)
+      if path = get_app_path(hostname)
         File.basename(path)
       end
     end
 
-    def get_app_symlink_path(hostname)
-      symlinked_app_dir = "#{apps_dir}/#{hostname.app_name}"
+    def get_app_path(hostname)
+      app_path = "#{apps_dir}/#{hostname.app_name}"
 
-      if File.symlink?(symlinked_app_dir)
-        return symlinked_app_dir
+      if File.exist?(app_path) || File.symlink?(app_path)
+        return app_path
       end
 
       if hostname != hostname.root
-        symlinked_app_dir = "#{apps_dir}/#{hostname.root.app_name}"
+        app_path = "#{apps_dir}/#{hostname.root.app_name}"
 
-        if File.symlink?(symlinked_app_dir)
-          return symlinked_app_dir
+        if File.exist?(app_path) || File.symlink?(app_path)
+          return app_path
         end
       end
 
@@ -95,13 +110,6 @@ module Yeb
   end
 
   class AppNotFoundError < Error; end
-
-  class AppNotRecognizedError < Error
-    attr_reader :path
-
-    def initialize(app_name, path)
-      super(app_name)
-      @path = path
-    end
-  end
+  class AppNotRecognizedError < AppError; end
+  class AppSymlinkInvalidError < AppError; end
 end

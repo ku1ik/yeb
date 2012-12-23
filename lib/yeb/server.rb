@@ -60,14 +60,22 @@ module Yeb
         })
       end
 
-    rescue AppStartFailedError => e
+    rescue AppSymlinkInvalidError => e
       response = Response.new do |r|
         r.status = 502
-        r.body = Template.render(:app_start_failed_error, {
+        r.body = Template.render(:app_symlink_invalid_error, {
           :app_name => e.app_name,
-          :stdout => e.stdout,
-          :stderr => e.stderr,
-          :env => e.env
+          :path => e.path
+        })
+      end
+
+    rescue AppConnectError => e
+      response = Response.new do |r|
+        r.status = 502
+        r.body = Template.render(e.template_name, {
+          :app_name => e.app_name,
+          :path => e.path,
+          :exception => e
         })
       end
 
@@ -113,19 +121,16 @@ module Yeb
       trap('INT') do
         puts 'inting'
         stop
-        puts 'inted'
       end
 
       trap('TERM') do
         puts 'terming'
         stop
-        puts 'termed'
       end
 
       trap('QUIT') do
         puts 'quitting'
         stop
-        puts 'quited'
       end
 
       # trap("HUP") { handle_hup }

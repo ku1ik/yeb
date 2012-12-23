@@ -1,8 +1,8 @@
+require 'socket'
+
 require 'yeb/app'
 require 'yeb/command'
 require 'yeb/process'
-require 'yeb/template'
-require 'yeb/error'
 
 module Yeb
   class RackApp < App
@@ -39,17 +39,7 @@ module Yeb
     end
 
     def command
-      Command.new("#{thin} start -p #{port}", path)
-    end
-
-    def thin
-      path = `which thin`.strip
-
-      if path == ''
-        raise 'nie ma thina'
-      end
-
-      path
+      Command.new("thin start -p #{port}", path)
     end
 
     def env
@@ -60,16 +50,15 @@ module Yeb
     end
 
     def vhost_context
-      { :port => port }
+      super.merge({ :port => port })
     end
   end
 
-  class AppStartFailedError < Error
-    attr_reader :path, :stdout, :stderr, :env
+  class AppStartFailedError < AppConnectError
+    attr_reader :stdout, :stderr, :env
 
     def initialize(app_name, path, stdout, stderr, env)
-      super(app_name)
-      @path = path
+      super(app_name, path)
       @stdout = stdout
       @stderr = stderr
       @env = env
