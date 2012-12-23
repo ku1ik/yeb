@@ -46,7 +46,7 @@ module Yeb
       command = Command.new("/usr/bin/env | sort")
       process = Process.new(command)
       process.start
-      process.stdout + process.stderr
+      (process.stdout + process.stderr).strip
     end
 
     def vhost_context
@@ -59,8 +59,8 @@ module Yeb
 
     def initialize(app_name, path, stdout, stderr, env)
       super(app_name, path)
-      @stdout = stdout
-      @stderr = stderr
+      @stdout = stdout.strip
+      @stderr = stderr.strip
       @env = env
     end
   end
