@@ -14,7 +14,17 @@ module Yeb
 
     def get_app(hostname)
       if name = get_app_name(hostname)
+        if app = apps[name]
+          # probably it's dead or socket not responding
+          unless app.alive?
+            puts 'removing dead app'
+            app.dispose
+            apps.delete(name)
+          end
+        end
+
         unless apps[name]
+          puts 'creating new app'
           path = get_app_symlink_path(hostname)
           apps[name] = create_app(name, path)
         end

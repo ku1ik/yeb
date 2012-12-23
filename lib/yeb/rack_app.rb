@@ -34,6 +34,10 @@ module Yeb
       end
     end
 
+    def dispose
+      # kill process if still running
+    end
+
     def command
       Command.new("#{thin} start -p #{port}", path)
     end

@@ -24,6 +24,8 @@ module Yeb
       false
     end
 
+    alias :alive? :socket_ready?
+
     def type
       self.class.to_s.split('::').last.gsub(/([a-z])([A-Z])/, "\\1_\\2").downcase
     end
@@ -33,6 +35,10 @@ module Yeb
     end
 
     def spawn
+      raise NotImplementedError
+    end
+
+    def dispose
       raise NotImplementedError
     end
 
