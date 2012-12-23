@@ -118,5 +118,5 @@ end
 
 # trap("HUP") { handle_hup }
 
-require 'yeb/spawn_server'
-Yeb::SpawnServer.new(SERVER_SOCKET_PATH, APPS_DIR).listen
+require 'yeb/daemon'
+Yeb::Daemon.new(SERVER_SOCKET_PATH, APPS_DIR).run

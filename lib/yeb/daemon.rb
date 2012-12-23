@@ -3,7 +3,7 @@ require 'socket'
 require 'yeb/request_handler'
 
 module Yeb
-  class SpawnServer
+  class Daemon
     attr_reader :request_handler
 
     def initialize(socket_path, apps_dir)
@@ -11,7 +11,7 @@ module Yeb
       @request_handler = RequestHandler.new(apps_dir)
     end
 
-    def listen
+    def run
       FileUtils.rm(@socket_path) if File.exist?(@socket_path)
 
       socket = UNIXServer.new(@socket_path)
