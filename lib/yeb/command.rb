@@ -26,7 +26,7 @@ module Yeb
         parts << "cd #{cwd}"
       end
 
-      parts << command
+      parts << "exec #{command}"
 
       combined = parts.join(" && ")
 
