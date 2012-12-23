@@ -13,6 +13,13 @@ server {
   include _spawner.conf;
   try_files $uri/fail @spawner;
 
+  # prevent subsequent spawn request on yeb error pages
+  location /favicon.ico {
+    access_log off;
+    log_not_found off;
+    deny all;
+  }
+
   if ($host ~* "\.*([^.]+)\.(<%= Yeb::Hostname::TLD_REGEXP.source %>)$") {
     set $app_name $1;
   }
