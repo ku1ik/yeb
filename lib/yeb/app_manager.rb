@@ -4,12 +4,12 @@ require 'pathname'
 
 module Yeb
   class AppManager
-    attr_reader :apps_dir, :apps
+    attr_reader :apps_dir, :apps, :next_available_port
 
     def initialize(apps_dir)
       @apps_dir = apps_dir
       @apps = {}
-      @port = 20000
+      @next_available_port = 20000
     end
 
     def get_app(hostname)
@@ -31,12 +31,15 @@ module Yeb
       if File.directory?(real_path)
         if File.exist?("#{real_path}/config.ru")
           app = RackApp.new(name, real_path, next_available_port)
+          app.spawn
+          @next_available_port += 1
         else
           raise AppNotRecognizedError.new(name, path)
         end
 
       elsif File.socket?(real_path)
         app = UnixSocketProxy.new(name, real_path)
+        app.spawn
 
       elsif File.file?(real_path)
         upstream = File.read(real_path).strip
@@ -44,6 +47,7 @@ module Yeb
         if upstream =~ /^\d+$/
           port = upstream.to_i
           app = TcpSocketProxy.new(name, real_path, port)
+          app.spawn
         else
           raise AppNotRecognizedError.new(name, path)
         end
@@ -52,7 +56,6 @@ module Yeb
         raise AppNotRecognizedError.new(name, path)
       end
 
-      app.spawn
       app
     end
 
@@ -79,14 +82,16 @@ module Yeb
 
       nil
     end
-
-    def next_available_port
-      port = @port
-      @port += 1
-      port
-    end
   end
 
   class AppNotFoundError < Error; end
-  class AppNotRecognizedError < Error; end
+
+  class AppNotRecognizedError < Error
+    attr_reader :path
+
+    def initialize(app_name, path)
+      super(app_name)
+      @path = path
+    end
+  end
 end

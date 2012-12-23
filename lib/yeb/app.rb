@@ -8,7 +8,7 @@ module Yeb
       @name = name
     end
 
-    def handle(request)
+    def call(request)
       socket = connect
       socket.send(request, 0)
       response = socket.recv(4 * 1024 * 1024)
@@ -24,6 +24,10 @@ module Yeb
       false
     end
 
+    def type
+      self.class.to_s.split('::').last.gsub(/([a-z])([A-Z])/, "\\1_\\2").downcase
+    end
+
     def connect
       raise NotImplementedError
     end
@@ -32,7 +36,7 @@ module Yeb
       raise NotImplementedError
     end
 
-    def write_vhost_file(hostname)
+    def vhost_context
       raise NotImplementedError
     end
   end

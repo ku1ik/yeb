@@ -7,21 +7,28 @@ require 'yeb/hostname'
 
 module Yeb
   class NGiNX
-    def initialize
+    attr_reader :dir, :yeb_socket_path, :bin_path, :vhosts_dir, :static_assets_dir
+
+    def initialize(dir, yeb_socket_path)
+      @dir = dir
+      @yeb_socket_path = yeb_socket_path
+      @bin_path = "#{dir}/sbin/nginx"
+      @vhosts_dir = "#{dir}/conf/vhosts"
+      @static_assets_dir = File.expand_path('../../../nginx/static', __FILE__)
     end
 
     def start
-      unless File.exist?("#{NGINX_PREFIX}/sbin/nginx")
+      unless File.exist?(bin_path)
         install
       end
 
       prepare_vhosts_dir
-      write_configs
+      write_config_files
       run
     end
 
     def run
-      cmd = NGINX_BIN
+      cmd = bin_path
 
       @thread = Thread.new do
         loop do
@@ -60,7 +67,7 @@ module Yeb
         "wget #{download_url} && " \
         "tar xf nginx-1.2.6.tar.gz && " \
         "cd nginx-1.2.6 && " \
-        "./configure --prefix=#{NGINX_PREFIX} && " \
+        "./configure --prefix=#{dir} && " \
         "make && " \
         "make install && " \
         "rm -rf #{tmp_dir}"
@@ -68,24 +75,29 @@ module Yeb
     end
 
     def prepare_vhosts_dir
-      Dir.mkdir(VHOSTS_DIR) unless File.directory?(VHOSTS_DIR)
-      FileUtils.rm Dir.glob("#{VHOSTS_DIR}/*")
+      Dir.mkdir(vhosts_dir) unless File.directory?(vhosts_dir)
+      FileUtils.rm(Dir.glob("#{vhosts_dir}/*"))
     end
 
-    def write_configs
-      tpl = ERB.new(File.read('nginx/conf/default-site.conf.erb'))
-      File.open("#{NGINX_PREFIX}/conf/default-site.conf", "w") do |f|
-        f.write(tpl.result)
-      end
+    def write_config_files
+      write_config_file('default.conf')
+      write_config_file('yeb.conf')
+      write_config_file('_spawner.conf')
+      write_config_file('nginx.conf')
+    end
 
-      tpl = ERB.new(File.read('nginx/conf/dynamic-site.conf.erb'))
-      File.open("#{NGINX_PREFIX}/conf/dynamic-site.conf", "w") do |f|
-        f.write(tpl.result)
+    def write_config_file(config_path)
+      tpl = ERB.new(File.read("nginx/conf/#{config_path}.erb"))
+      File.open("#{dir}/conf/#{config_path}", "w") do |f|
+        f.write(tpl.result(binding))
       end
+    end
 
-      tpl = ERB.new(File.read('nginx/conf/nginx.conf.erb'))
-      File.open("#{NGINX_PREFIX}/conf/nginx.conf", "w") do |f|
-        f.write(tpl.result)
+    def write_vhost_file(app_type, vhost_name, context)
+      data = ERBTemplate.render("nginx/conf/app_types/#{app_type}.conf.erb", context)
+
+      File.open("#{vhosts_dir}/#{vhost_name}.conf", 'w') do |f|
+        f.write(data)
       end
     end
   end

@@ -1,0 +1,13 @@
+# vim:ft=nginx
+
+server {
+  listen 30666;
+
+  # handle all other not recegnized hosts/TLDs
+  server_name _;
+
+  # serve static files provided by gem
+  root <%= static_assets_dir %>;
+
+  try_files $uri/index.html $uri.html $uri /404.html =404;
+}

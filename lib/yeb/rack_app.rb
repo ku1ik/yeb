@@ -30,7 +30,7 @@ module Yeb
       end
 
       unless socket_ready?
-        raise AppStartFailedError.new(name, process.stdout, process.stderr, env)
+        raise AppStartFailedError.new(name, path, process.stdout, process.stderr, env)
       end
     end
 
@@ -55,26 +55,17 @@ module Yeb
       process.stdout + process.stderr
     end
 
-    def write_vhost_file(hostname)
-      context = {
-        :app_name => name,
-        :hostname => hostname.to_s,
-        :port => port
-      }
-
-      data = ERBTemplate.render('nginx/conf/forwarded-site.conf.erb', context)
-
-      File.open("#{VHOSTS_DIR}/#{name}.conf", 'w') do |f|
-        f.write(data)
-      end
+    def vhost_context
+      { :port => port }
     end
   end
 
   class AppStartFailedError < Error
-    attr_reader :stdout, :stderr, :env
+    attr_reader :path, :stdout, :stderr, :env
 
-    def initialize(app_name, stdout, stderr, env)
+    def initialize(app_name, path, stdout, stderr, env)
       super(app_name)
+      @path = path
       @stdout = stdout
       @stderr = stderr
       @env = env

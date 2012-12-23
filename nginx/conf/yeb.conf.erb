@@ -1,0 +1,22 @@
+# vim:ft=nginx
+
+server {
+  listen 30666;
+
+  # handle all TLDs we know about
+  server_name <%= Yeb::Hostname::TLD_WILDCARDS %>;
+
+  # root doesn't matter here but needs to be set
+  root <%= static_assets_dir %>;
+
+  # handle all requests with yeb spawner
+  include _spawner.conf;
+  try_files /system/maintenance.html @spawner;
+
+  if ($host ~* "\.*([^.]+)\.(<%= Yeb::Hostname::TLD_REGEXP.source %>)$") {
+    set $app_name $1;
+  }
+  access_log logs/$app_name.access.log;
+
+  error_page 404 /404.html;
+}

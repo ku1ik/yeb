@@ -1,7 +1,6 @@
 # vim:ft=nginx
 
 daemon off;
-#user  kill;
 worker_processes  1;
 
 #error_log  logs/error.log;
@@ -36,9 +35,9 @@ http {
 
     client_max_body_size 1g;
 
-    include default-site.conf;
-    include <%= VHOSTS_DIR %>/*;
-    include dynamic-site.conf;
+    include default.conf;
+    include <%= vhosts_dir %>/*;
+    include yeb.conf;
 
     # another virtual host using mix of IP-, name-, and port-based configuration
     #

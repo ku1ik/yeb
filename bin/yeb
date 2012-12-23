@@ -3,25 +3,10 @@
 # TODO: remove below when ready for gem packaging
 $:.unshift './lib'
 
-
-# TODO: move below to Yeb::Configuration
-DIR = File.expand_path("~/.yeb")
-NGINX_PREFIX = "#{DIR}/.nginx"
-NGINX_BIN = "#{NGINX_PREFIX}/sbin/nginx"
-NGINX_STATIC_ASSETS = File.expand_path('../../nginx/static', __FILE__)
-SOCKETS_DIR = "#{DIR}/.sockets"
-VHOSTS_DIR = "#{DIR}/.vhosts"
-APPS_DIR = DIR
-SERVER_SOCKET_PATH = "#{SOCKETS_DIR}/_.sock"
-HTTP_PORT = 30666
-HTTPS_PORT = 30667
-
-puts "creating dir #{DIR}"
-Dir.mkdir(DIR) unless File.directory?(DIR)
-Dir.mkdir(SOCKETS_DIR) unless File.directory?(SOCKETS_DIR)
-
 # TODO: sudo really needed?
 system("sudo ./bin/initd start") or raise "can't set FW forwarding"
 
-require 'yeb/daemon'
-Yeb::Daemon.new(SERVER_SOCKET_PATH, APPS_DIR).start
+require 'yeb/server'
+
+dir = File.expand_path("~/.yeb")
+Yeb::Server.new(dir).start
