@@ -79,7 +79,12 @@ module Yeb
 
     ensure
       nginx.reload
-      client_socket.send(response.to_s, 0)
+
+      begin
+        client_socket.send(response.to_s, 0)
+      rescue Errno::EPIPE => e
+      end
+
       client_socket.close
     end
 
