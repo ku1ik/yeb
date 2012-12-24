@@ -11,7 +11,12 @@ module Yeb
     def call(request)
       socket = connect
       socket.send(request, 0)
-      response = socket.recv(4 * 1024 * 1024)
+
+      response = ''
+      while (s = socket.recv(4 * 1024)).size > 0
+        response << s
+      end
+
       socket.close
       response
     end
