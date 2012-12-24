@@ -1,5 +1,11 @@
 <h2>Application "<%= app_name %>" could not be started</h2>
 
+<p>Command:</p>
+
+<pre>
+<%= exception.command.to_s.gsub('<', '&lt;') %>
+</pre>
+
 <p>STDERR:</p>
 
 <pre>

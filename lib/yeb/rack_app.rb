@@ -30,7 +30,7 @@ module Yeb
       end
 
       unless socket_ready?
-        raise AppStartFailedError.new(name, path, process.stdout, process.stderr, env)
+        raise AppStartFailedError.new(name, path, command, process.stdout, process.stderr, env)
       end
     end
 
@@ -39,7 +39,13 @@ module Yeb
     end
 
     def command
-      Command.new("thin start -p #{port}", path)
+      Command.new(
+        "if [[ -z $WEB ]]; then WEB=\"rackup -p $PORT\"; fi && $WEB",
+        :cwd => path,
+        :env => {
+          :PORT => port
+        }
+      )
     end
 
     def env
@@ -55,10 +61,11 @@ module Yeb
   end
 
   class AppStartFailedError < AppConnectError
-    attr_reader :stdout, :stderr, :env
+    attr_reader :command, :stdout, :stderr, :env
 
-    def initialize(app_name, path, stdout, stderr, env)
+    def initialize(app_name, path, command, stdout, stderr, env)
       super(app_name, path)
+      @command = command
       @stdout = stdout.strip
       @stderr = stderr.strip
       @env = env
