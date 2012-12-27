@@ -1,6 +1,7 @@
 require 'socket'
 require 'fileutils'
 
+require 'yeb/version'
 require 'yeb/app_manager'
 require 'yeb/nginx'
 require 'yeb/hostname'
@@ -19,6 +20,7 @@ module Yeb
     end
 
     def start
+      puts "starting Yeb v#{VERSION}"
       setup_signal_handlers
       nginx.start
       listen
