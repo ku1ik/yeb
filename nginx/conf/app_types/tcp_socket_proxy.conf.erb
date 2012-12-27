@@ -4,7 +4,7 @@ server {
   listen 30666;
 
   # handle specific hostname requests
-  server_name <%= hostname %>;
+  server_name "<%= server_name %>";
 
   root <%= apps_dir %>/<%= app_name %>/public;
 

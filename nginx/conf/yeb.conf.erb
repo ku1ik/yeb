@@ -4,7 +4,7 @@ server {
   listen 30666;
 
   # handle all TLDs we know about
-  server_name <%= Yeb::Hostname::TLD_WILDCARDS %>;
+  server_name "<%= Yeb::Hostname::SERVER_NAME_REGEXP %>";
 
   # root doesn't matter here but needs to be set
   root <%= static_assets_dir %>;

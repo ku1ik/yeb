@@ -99,7 +99,7 @@ module Yeb
     def add_nginx_vhost(hostname, app)
       context = {
         :app_name => app.name,
-        :hostname => hostname.to_s,
+        :server_name => hostname.to_nginx_server_name,
         :apps_dir => apps_dir
       }
 

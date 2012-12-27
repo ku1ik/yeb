@@ -1,7 +1,7 @@
 module Yeb
   class Hostname
-    TLD_WILDCARDS = "*.dev *.lvh.me *.xip.io"
     TLD_REGEXP = /dev|lvh\.me|(\d{1,3}\.){4}xip\.io/
+    SERVER_NAME_REGEXP = "~\\.(#{TLD_REGEXP.source})$"
 
     attr_reader :name
 
@@ -29,6 +29,10 @@ module Yeb
 
     def to_s
       name
+    end
+
+    def to_nginx_server_name
+      "~^#{app_name}\\.(#{TLD_REGEXP.source})$"
     end
   end
 end
