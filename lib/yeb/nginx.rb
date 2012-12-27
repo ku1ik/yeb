@@ -2,12 +2,15 @@ require 'open3'
 require 'tmpdir'
 require 'erb'
 require 'fileutils'
+require 'digest/sha1'
 
 require 'yeb/hostname'
 
 module Yeb
   class NGiNX
+
     attr_reader :dir, :yeb_socket_path, :bin_path, :vhosts_dir, :static_assets_dir
+    attr_accessor :last_vhosts_dir_digest
 
     def initialize(dir, yeb_socket_path)
       @dir = dir
@@ -46,6 +49,21 @@ module Yeb
     def reload
       puts 'reloading nginx'
       ::Process.kill('HUP', @nginx_wait_thr.pid)
+    end
+
+    def reload_if_needed
+      current_vhosts_dir_digest = vhosts_dir_digest
+      if current_vhosts_dir_digest != last_vhosts_dir_digest
+        self.last_vhosts_dir_digest = current_vhosts_dir_digest
+        reload
+      end
+    end
+
+    def vhosts_dir_digest
+      Dir["#{vhosts_dir}/*.conf"].inject('') do |acc, file|
+        acc << Digest::SHA1.hexdigest(File.read(file))
+        acc
+      end
     end
 
     def install

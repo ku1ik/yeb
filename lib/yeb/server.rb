@@ -86,7 +86,7 @@ module Yeb
       end
 
     ensure
-      nginx.reload
+      nginx.reload_if_needed
 
       begin
         client_socket.send(response.to_s, 0)
