@@ -41,13 +41,8 @@ module Yeb
     end
 
     def command
-      Command.new(
-        "if [[ -z $WEB ]]; then WEB=\"rackup -p $PORT\"; fi && $WEB",
-        :cwd => path,
-        :env => {
-          :PORT => port
-        }
-      )
+      script = File.expand_path('../../../scripts/start-rack-app.sh', __FILE__)
+      Command.new("#{script} #{path}", :env => { 'PORT' => port.to_s })
     end
 
     def env
@@ -67,7 +62,7 @@ module Yeb
 
     def initialize(app_name, path, command, stdout, stderr, env)
       super(app_name, path)
-      @command = command
+      @command = command.command
       @stdout = stdout.strip
       @stderr = stderr.strip
       @env = env

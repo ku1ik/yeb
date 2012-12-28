@@ -8,7 +8,7 @@ module Yeb
 
     def start
       @stdin, @stdout, @stderr, @wait_thread =
-        Open3.popen3(command.full_command)
+        Open3.popen3(command.env, command.command)
 
       @stdin.close
     end
