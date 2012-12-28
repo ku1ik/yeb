@@ -2,9 +2,23 @@ require 'erb'
 require 'ostruct'
 
 module Yeb
+  class ERBContext < OpenStruct
+    HTML_ESCAPE = {
+      '&' => '&amp;',
+      '>' => '&gt;',
+      '<' => '&lt;',
+      '"' => '&quot;',
+      "'" => '&#x27;'
+    }
+
+    def h(string)
+      string.to_s.gsub(/[&"'><]/, HTML_ESCAPE)
+    end
+  end
+
   class ERBTemplate
     def self.render(_path, context = {})
-      b = OpenStruct.new(context).instance_eval { binding }
+      b = ERBContext.new(context).instance_eval { binding }
       template = File.read(_path)
       ERB.new(template).result(b)
     end

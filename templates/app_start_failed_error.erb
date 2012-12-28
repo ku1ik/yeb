@@ -3,23 +3,23 @@
 <p>Command:</p>
 
 <pre>
-<%= exception.command.to_s.gsub('<', '&lt;') %>
+<%= h exception.command.to_s %>
 </pre>
 
 <p>STDERR:</p>
 
 <pre>
-<%= exception.stderr.gsub('<', '&lt;') %>
+<%= h exception.stderr %>
 </pre>
 
 <p>STDOUT:</p>
 
 <pre>
-<%= exception.stdout.gsub('<', '&lt;') %>
+<%= h exception.stdout %>
 </pre>
 
 <p>ENV:</p>
 
 <pre>
-<%= exception.env.gsub('<', '&lt;') %>
+<%= h exception.env %>
 </pre>
