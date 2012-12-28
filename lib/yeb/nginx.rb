@@ -8,6 +8,8 @@ require 'yeb/hostname'
 
 module Yeb
   class NGiNX
+    HTTP_PORT = 30666
+    HTTPS_PORT = 30667
 
     attr_reader :dir, :yeb_socket_path, :bin_path, :vhosts_dir, :static_assets_dir
     attr_accessor :last_vhosts_dir_digest

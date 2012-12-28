@@ -1,7 +1,7 @@
 # vim:ft=nginx
 
 server {
-  listen 30666;
+  listen <%= HTTP_PORT %>;
 
   # handle all other not recegnized hosts/TLDs
   server_name _;
