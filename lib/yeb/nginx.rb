@@ -8,8 +8,6 @@ require 'yeb/hostname'
 
 module Yeb
   class NGiNX
-    DOWNLOAD_VERSION = "1.2.6"
-    DOWNLOAD_URL = "http://nginx.org/download/nginx-#{DOWNLOAD_VERSION}.tar.gz"
     HTTP_PORT = 30666
     HTTPS_PORT = 30667
 
@@ -82,19 +80,7 @@ module Yeb
       Yeb.logger.info 'installing nginx'
 
       FileUtils.mkdir_p(dir)
-      tmp_dir = Dir.mktmpdir
-
-      system(
-        "(cd #{tmp_dir} && " \
-        "wget #{DOWNLOAD_URL} && " \
-        "tar xf nginx-#{DOWNLOAD_VERSION}.tar.gz && " \
-        "cd nginx-#{DOWNLOAD_VERSION} && " \
-        "./configure --prefix=#{dir} && " \
-        "make && " \
-        "make install && " \
-        "rm -rf #{tmp_dir} " \
-        ") >#{installation_log_path} 2>&1"
-      )
+      system("scripts/install-nginx.sh #{dir} >#{installation_log_path} 2>&1")
     end
 
     def installation_log_path
