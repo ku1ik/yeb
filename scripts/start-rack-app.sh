@@ -13,10 +13,14 @@ if [[ -f .yebrc ]]; then
 fi
 
 if [[ -z $WEB ]]; then
-  if [ $(which thin 2>/dev/null) ]; then
-    WEB="thin start -p $PORT"
+  if [[ -f Gemfile ]]; then
+    runner="bundle exec"
+  fi
+
+  if [ $($runner which thin 2>/dev/null) ]; then
+    WEB="$runner thin start -p $PORT"
   else
-    WEB="rackup -p $PORT"
+    WEB="$runner rackup -p $PORT"
   fi
 fi
 
