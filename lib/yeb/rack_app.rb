@@ -19,17 +19,19 @@ module Yeb
     end
 
     def spawn
-      puts "Spawning Rack app #{name} in #{path}"
+      Yeb.logger.info "spawning Rack app \"#{name}\" in #{path}"
 
       process = Process.new(command)
       process.start
 
       while process.alive? && !socket_ready?
-        puts "waiting for port #{port} to accept connections"
+        Yeb.logger.debug "waiting for port #{port} to accept connections"
         sleep 1
       end
 
-      unless socket_ready?
+      if socket_ready?
+        Yeb.logger.debug "app \"#{name}\" is ready"
+      else
         raise AppStartFailedError.new(name, path, command, process.stdout, process.stderr, env)
       end
     end

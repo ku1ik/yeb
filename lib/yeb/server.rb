@@ -2,6 +2,7 @@ require 'socket'
 require 'fileutils'
 
 require 'yeb/version'
+require 'yeb/logger'
 require 'yeb/app_manager'
 require 'yeb/nginx'
 require 'yeb/hostname'
@@ -20,7 +21,7 @@ module Yeb
     end
 
     def start
-      puts "starting Yeb v#{VERSION}"
+      Yeb.logger.info "starting Yeb v#{VERSION}"
       setup_signal_handlers
       nginx.start
       listen
@@ -31,7 +32,6 @@ module Yeb
       socket = UNIXServer.new(socket_path)
 
       Socket.accept_loop(socket) do |client_socket, addr|
-        puts 'got request'
         handle(client_socket)
       end
     end
@@ -40,6 +40,7 @@ module Yeb
       response = nil
       request = client_socket.recv(4096 * 1024)
       hostname = Hostname.from_http_request(request)
+      Yeb.logger.info "got request for #{hostname}"
       remove_nginx_vhost(hostname)
       app = app_manager.get_app(hostname)
       response = app.call(request)

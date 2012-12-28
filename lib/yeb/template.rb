@@ -23,8 +23,8 @@ module Yeb
       layout
 
     rescue => e
-      puts e
-      puts e.backtrace.join("\n")
+      Yeb.logger.error e
+      Yeb.logger.error e.backtrace.join("\n")
       'Shit.'
     end
   end

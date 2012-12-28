@@ -19,14 +19,14 @@ module Yeb
         if app = apps[name]
           # probably it's dead or socket not responding
           unless app.alive?
-            puts 'removing dead app'
+            Yeb.logger.info "removing dead app \"#{name}\""
             app.dispose
             apps.delete(name)
           end
         end
 
         unless apps[name]
-          puts 'creating new app'
+          Yeb.logger.info "creating new app \"#{name}\""
           path = get_app_path(hostname)
           apps[name] = create_app(name, path)
         end

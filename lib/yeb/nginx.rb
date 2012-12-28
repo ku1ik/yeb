@@ -31,12 +31,14 @@ module Yeb
     end
 
     def run
+      Yeb.logger.info "starting nginx"
+
       cmd = bin_path
 
       @thread = Thread.new do
         i, o, e, @nginx_wait_thr = Open3.popen3(cmd)
         @nginx_wait_thr.value # wait for process to finish
-        puts "NGiNX exited"
+        Yeb.logger.error "nginx died"
       end
 
       @thread.abort_on_exception = true
@@ -47,7 +49,7 @@ module Yeb
     end
 
     def reload
-      puts 'reloading nginx'
+      Yeb.logger.info 'reloading nginx'
       ::Process.kill('HUP', @nginx_wait_thr.pid)
     end
 
@@ -67,7 +69,7 @@ module Yeb
     end
 
     def install
-      puts 'installing nginx'
+      Yeb.logger.info 'installing nginx'
 
       tmp_dir = Dir.mktmpdir
       download_url = "http://nginx.org/download/nginx-1.2.6.tar.gz"
@@ -104,14 +106,17 @@ module Yeb
     end
 
     def add_vhost_file(vhost_name, app_type, context)
-      data = ERBTemplate.render("nginx/conf/app_types/#{app_type}.conf.erb", context)
+      Yeb.logger.debug "adding vhost for \"#{vhost_name}\""
 
+      data = ERBTemplate.render("nginx/conf/app_types/#{app_type}.conf.erb", context)
       File.open(vhost_file_path(vhost_name), 'w') do |f|
         f.write(data)
       end
     end
 
     def remove_vhost_file(vhost_name)
+      Yeb.logger.debug "removing vhost for \"#{vhost_name}\""
+
       FileUtils.rm_rf(vhost_file_path(vhost_name))
     end
 

@@ -34,7 +34,7 @@ module Yeb
       parts << command
 
       combined = parts.join(" && ").gsub("'", %('"'"'))
-      puts combined
+      Yeb.logger.debug "running command: #{combined}"
 
       "/bin/bash -c '#{combined}'"
     end
