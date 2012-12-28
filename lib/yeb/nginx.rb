@@ -101,6 +101,8 @@ module Yeb
     end
 
     def write_config_file(config_path)
+      Yeb.logger.debug "writing nginx config file \"#{config_path}\""
+
       tpl = ERB.new(File.read("nginx/conf/#{config_path}.erb"))
       File.open("#{dir}/conf/#{config_path}", "w") do |f|
         f.write(tpl.result(binding))
@@ -108,7 +110,7 @@ module Yeb
     end
 
     def add_vhost_file(vhost_name, app_type, context)
-      Yeb.logger.debug "adding vhost for \"#{vhost_name}\""
+      Yeb.logger.debug "adding nginx vhost for \"#{vhost_name}\""
 
       data = ERBTemplate.render("nginx/conf/app_types/#{app_type}.conf.erb", context)
       File.open(vhost_file_path(vhost_name), 'w') do |f|
@@ -117,7 +119,7 @@ module Yeb
     end
 
     def remove_vhost_file(vhost_name)
-      Yeb.logger.debug "removing vhost for \"#{vhost_name}\""
+      Yeb.logger.debug "removing nginx vhost for \"#{vhost_name}\""
 
       FileUtils.rm_rf(vhost_file_path(vhost_name))
     end
