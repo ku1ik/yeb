@@ -8,6 +8,8 @@ require 'yeb/hostname'
 
 module Yeb
   class NGiNX
+    DOWNLOAD_VERSION = "1.2.6"
+    DOWNLOAD_URL = "http://nginx.org/download/nginx-#{DOWNLOAD_VERSION}.tar.gz"
     HTTP_PORT = 30666
     HTTPS_PORT = 30667
 
@@ -24,12 +26,18 @@ module Yeb
 
     def start
       unless File.exist?(bin_path)
-        install
+        install or raise InstallationError
       end
 
       prepare_vhosts_dir
       write_config_files
       run
+
+      true
+
+    rescue InstallationError
+      Yeb.logger.fatal "nginx installation failed, see #{installation_log_path} for details"
+      false
     end
 
     def run
@@ -73,19 +81,24 @@ module Yeb
     def install
       Yeb.logger.info 'installing nginx'
 
+      FileUtils.mkdir_p(dir)
       tmp_dir = Dir.mktmpdir
-      download_url = "http://nginx.org/download/nginx-1.2.6.tar.gz"
 
       system(
-        "cd #{tmp_dir} && " \
-        "wget #{download_url} && " \
-        "tar xf nginx-1.2.6.tar.gz && " \
-        "cd nginx-1.2.6 && " \
+        "(cd #{tmp_dir} && " \
+        "wget #{DOWNLOAD_URL} && " \
+        "tar xf nginx-#{DOWNLOAD_VERSION}.tar.gz && " \
+        "cd nginx-#{DOWNLOAD_VERSION} && " \
         "./configure --prefix=#{dir} && " \
         "make && " \
         "make install && " \
-        "rm -rf #{tmp_dir}"
+        "rm -rf #{tmp_dir} " \
+        ") >#{installation_log_path} 2>&1"
       )
+    end
+
+    def installation_log_path
+      "#{dir}/install.log"
     end
 
     def prepare_vhosts_dir
@@ -127,5 +140,7 @@ module Yeb
     def vhost_file_path(vhost_name)
       "#{vhosts_dir}/#{vhost_name}.conf"
     end
+
+    class InstallationError < StandardError; end
   end
 end

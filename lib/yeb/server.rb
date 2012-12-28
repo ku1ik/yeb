@@ -23,8 +23,12 @@ module Yeb
     def start
       Yeb.logger.info "starting Yeb v#{VERSION}"
       setup_signal_handlers
-      nginx.start
-      listen
+
+      if nginx.start
+        listen
+      else
+        exit 1
+      end
     end
 
     def listen
