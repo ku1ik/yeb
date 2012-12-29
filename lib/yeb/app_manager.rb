@@ -1,6 +1,7 @@
 require 'yeb/rack_app'
 require 'yeb/tcp_socket_proxy'
 require 'yeb/unix_socket_proxy'
+require 'yeb/static_site'
 require 'yeb/error'
 require 'pathname'
 
@@ -49,6 +50,8 @@ module Yeb
           app = RackApp.new(name, real_path, next_available_port)
           app.spawn
           @next_available_port += 1
+        elsif File.exist?("#{real_path}/index.html")
+          app = StaticSite.new(name, real_path)
         else
           raise AppNotRecognizedError.new(name, path)
         end

@@ -1,5 +1,6 @@
 require 'socket'
 require 'fileutils'
+require 'stringio'
 
 require 'yeb/version'
 require 'yeb/logger'
@@ -42,8 +43,8 @@ module Yeb
 
     def handle(client_socket)
       response = nil
-      request = client_socket.recv(4096 * 1024)
-      hostname = Hostname.from_http_request(request)
+      request = StringIO.new(client_socket.recv(4096 * 1024))
+      hostname = Hostname.from_http_request(request.string)
       Yeb.logger.info "got request for #{hostname}"
       remove_nginx_vhost(hostname)
       app = app_manager.get_app(hostname)

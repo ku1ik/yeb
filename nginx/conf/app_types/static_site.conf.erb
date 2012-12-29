@@ -1,0 +1,16 @@
+# vim:ft=nginx
+
+server {
+  listen <%= Yeb::NGiNX::HTTP_PORT %>;
+
+  # handle specific hostname requests
+  server_name "<%= server_name %>";
+
+  root <%= apps_dir %>/<%= app_name %>;
+
+  include _spawner.conf;
+
+  try_files $uri/index.html $uri.html $uri @spawner;
+
+  access_log logs/<%= app_name %>.access.log;
+}

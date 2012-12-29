@@ -10,7 +10,7 @@ module Yeb
 
     def call(request)
       socket = connect
-      socket.send(request, 0)
+      socket.send(request.string, 0)
 
       response = ''
       while (s = socket.recv(4 * 1024)).size > 0
@@ -29,7 +29,7 @@ module Yeb
       false
     end
 
-    alias :alive? :socket_ready?
+    alias alive? socket_ready?
 
     def type
       self.class.to_s.split('::').last.gsub(/([a-z])([A-Z])/, "\\1_\\2").downcase
