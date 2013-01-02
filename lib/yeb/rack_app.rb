@@ -17,7 +17,7 @@ module Yeb
       TCPSocket.new('localhost', port)
     end
 
-    def spawn
+    def start
       Yeb.logger.info "spawning Rack app \"#{name}\" in #{path}"
 
       process = Process.new(command)

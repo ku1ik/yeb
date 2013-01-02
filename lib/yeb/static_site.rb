@@ -39,7 +39,7 @@ module Yeb
       true
     end
 
-    def spawn
+    def start
       # no op
     end
 

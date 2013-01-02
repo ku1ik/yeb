@@ -17,7 +17,7 @@ module Yeb
       raise NotImplementedError
     end
 
-    def spawn
+    def start
       raise NotImplementedError
     end
 

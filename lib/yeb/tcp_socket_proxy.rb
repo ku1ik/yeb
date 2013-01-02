@@ -16,7 +16,7 @@ module Yeb
       TCPSocket.new(host, port)
     end
 
-    def spawn
+    def start
       unless socket_ready?
         raise TcpProxyConnectError.new(name, path, host, port)
       end
