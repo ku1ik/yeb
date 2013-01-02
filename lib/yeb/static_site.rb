@@ -36,7 +36,7 @@ module Yeb
     end
 
     def alive?
-      true
+      File.directory?(path)
     end
 
     def start
