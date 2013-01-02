@@ -118,9 +118,11 @@ module Yeb
     end
 
     def remove_vhost_file(vhost_name)
-      Yeb.logger.debug "removing nginx vhost for \"#{vhost_name}\""
+      path = vhost_file_path(vhost_name)
+      return unless File.exist?(path)
 
-      FileUtils.rm_rf(vhost_file_path(vhost_name))
+      Yeb.logger.debug "removing nginx vhost for \"#{vhost_name}\""
+      FileUtils.rm_rf(path)
     end
 
     def vhost_file_path(vhost_name)
