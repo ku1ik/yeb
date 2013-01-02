@@ -52,52 +52,56 @@ module Yeb
       add_nginx_vhost(hostname, app)
 
     rescue AppNotFoundError => e
-      response = Response.new do |r|
-        r.status = 404
-        r.body = Template.render(:app_not_found_error, {
-          :app_name => e.app_name
-        })
-      end
+      body = Template.render(:app_not_found_error, {
+        :app_name => e.app_name
+      })
+
+      response = [404, body]
 
     rescue AppNotRecognizedError => e
-      response = Response.new do |r|
-        r.status = 404
-        r.body = Template.render(:app_not_recognized_error, {
-          :app_name => e.app_name,
-          :path => e.path
-        })
-      end
+      body = Template.render(:app_not_recognized_error, {
+        :app_name => e.app_name,
+        :path => e.path
+      })
+
+      response = [404, body]
 
     rescue AppSymlinkInvalidError => e
-      response = Response.new do |r|
-        r.status = 502
-        r.body = Template.render(:app_symlink_invalid_error, {
-          :app_name => e.app_name,
-          :path => e.path
-        })
-      end
+      body = Template.render(:app_symlink_invalid_error, {
+        :app_name => e.app_name,
+        :path => e.path
+      })
+
+      response = [502, body]
 
     rescue AppConnectError => e
-      response = Response.new do |r|
-        r.status = 502
-        r.body = Template.render(e.template_name, {
-          :app_name => e.app_name,
-          :path => e.path,
-          :exception => e
-        })
-      end
+      body = Template.render(e.template_name, {
+        :app_name => e.app_name,
+        :path => e.path,
+        :exception => e
+      })
+
+      response = [502, body]
 
     rescue => e
-      response = Response.new do |r|
-        r.status = 500
-        r.body = Template.render(:unknown_error, { :exception => e })
-      end
+      body = Template.render(:unknown_error, { :exception => e })
+      response = [500, body]
 
     ensure
       nginx.reload_if_needed
 
       begin
-        client_socket.send(response.to_s, 0)
+        if response.is_a?(Array)
+          response_text = Response.new do |r|
+            r.status = response[0]
+            r.body = response[1]
+          end.to_s
+        else
+          response_text = response.to_s
+        end
+
+        client_socket.send(response_text, 0)
+
       rescue Errno::EPIPE => e
       end
 

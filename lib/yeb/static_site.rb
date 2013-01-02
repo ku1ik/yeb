@@ -21,18 +21,10 @@ module Yeb
       end
 
       if File.exist?(filename)
-        response = Response.new do |r|
-          r.status = 200
-          r.body = File.read(filename)
-        end
+        [200, File.read(filename)]
       else
-        response = Response.new do |r|
-          r.status = 404
-          r.body = "#{req.path} not found"
-        end
+        [404, "#{req.path} not found"]
       end
-
-      response.to_s
     end
 
     def alive?
