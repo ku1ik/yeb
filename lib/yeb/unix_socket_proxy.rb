@@ -1,22 +1,13 @@
 require 'socket'
 
-require 'yeb/app'
+require 'yeb/socket_proxy'
 
 module Yeb
-  class UnixSocketProxy < App
-    attr_reader :path
-
-    def initialize(name, path)
-      super(name)
-      @path = path
-    end
+  class UnixSocketProxy < SocketProxy
 
     def connect
       UNIXSocket.new(path)
     end
 
-    def spawn
-      # no op
-    end
   end
 end

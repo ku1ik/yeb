@@ -1,16 +1,15 @@
 require 'socket'
 
-require 'yeb/app'
+require 'yeb/socket_proxy'
 require 'yeb/command'
 require 'yeb/process'
 
 module Yeb
-  class RackApp < App
-    attr_reader :path, :port
+  class RackApp < SocketProxy
+    attr_reader :port
 
     def initialize(name, path, port)
-      super(name)
-      @path = path
+      super(name, path)
       @port = port
     end
 
@@ -36,9 +35,11 @@ module Yeb
       end
     end
 
-    def dispose
-      # kill process if still running
+    def vhost_context
+      super.merge({ :port => port })
     end
+
+    private
 
     def command
       script = File.expand_path('../../../scripts/start-rack-app.sh', __FILE__)
@@ -50,10 +51,6 @@ module Yeb
       process = Process.new(command)
       process.start
       (process.stdout + process.stderr).strip
-    end
-
-    def vhost_context
-      super.merge({ :port => port })
     end
   end
 

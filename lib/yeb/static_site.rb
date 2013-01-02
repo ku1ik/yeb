@@ -9,12 +9,6 @@ require 'yeb/response'
 
 module Yeb
   class StaticSite < App
-    attr_reader :path
-
-    def initialize(name, path)
-      super(name)
-      @path = path
-    end
 
     def call(request)
       req = WEBrick::HTTPRequest.new({})
@@ -48,5 +42,6 @@ module Yeb
     def spawn
       # no op
     end
+
   end
 end

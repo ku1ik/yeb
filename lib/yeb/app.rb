@@ -2,40 +2,18 @@ require 'yeb/error'
 
 module Yeb
   class App
-    attr_reader :name
+    attr_reader :name, :path
 
-    def initialize(name)
+    def initialize(name, path)
       @name = name
+      @path = path
     end
-
-    def call(request)
-      socket = connect
-      socket.send(request.string, 0)
-
-      response = ''
-      while (s = socket.recv(4 * 1024)).size > 0
-        response << s
-      end
-
-      socket.close
-      response
-    end
-
-    def socket_ready?
-      socket = connect
-      socket.close
-      true
-    rescue Errno::ECONNREFUSED, Errno::ENOENT
-      false
-    end
-
-    alias alive? socket_ready?
 
     def type
       self.class.to_s.split('::').last.gsub(/([a-z])([A-Z])/, "\\1_\\2").downcase
     end
 
-    def connect
+    def call(request)
       raise NotImplementedError
     end
 
@@ -53,10 +31,4 @@ module Yeb
   end
 
   class NotImplementedError < StandardError; end
-
-  class AppConnectError < AppError
-    def template_name
-      self.class.to_s.split('::').last.gsub(/([a-z])([A-Z])/, "\\1_\\2").downcase
-    end
-  end
 end

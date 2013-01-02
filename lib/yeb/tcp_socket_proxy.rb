@@ -1,14 +1,13 @@
 require 'socket'
 
-require 'yeb/app'
+require 'yeb/socket_proxy'
 
 module Yeb
-  class TcpSocketProxy < App
-    attr_reader :path, :host, :port
+  class TcpSocketProxy < SocketProxy
+    attr_reader :host, :port
 
     def initialize(name, path, host, port)
-      super(name)
-      @path = path
+      super(name, path)
       @host = host
       @port = port
     end
