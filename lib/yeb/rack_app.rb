@@ -6,6 +6,8 @@ require 'yeb/process'
 
 module Yeb
   class RackApp < SocketProxy
+    MAX_SPAWN_TIME = 60
+
     attr_reader :port
 
     def initialize(name, path, port)
@@ -23,9 +25,17 @@ module Yeb
       process = Process.new(command)
       process.start
 
-      while process.alive? && !socket_ready?
+      time_left = MAX_SPAWN_TIME
+      while time_left > 0 && process.alive? && !socket_ready?
         Yeb.logger.debug "waiting for port #{port} to accept connections"
         sleep 1
+        time_left -= 1
+      end
+
+      if time_left == 0
+        Yeb.logger.error "app \"#{name}\" hasn't exposed working socket in " \
+          "#{MAX_SPAWN_TIME} seconds, killing it"
+        process.stop
       end
 
       if socket_ready?

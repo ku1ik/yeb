@@ -13,6 +13,10 @@ module Yeb
       @stdin.close
     end
 
+    def stop
+      ::Process.kill("KILL", @wait_thread[:pid])
+    end
+
     def alive?
       @wait_thread.alive?
     end
