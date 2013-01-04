@@ -47,7 +47,7 @@ module Yeb
 
       thread = Thread.new do
         @nginx_wait_thr.value # wait for process to finish
-        Yeb.logger.error "nginx died"
+        Yeb.logger.info "nginx exited"
         exit 1
       end
     end

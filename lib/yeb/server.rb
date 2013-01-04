@@ -125,14 +125,6 @@ module Yeb
     end
 
     def setup_signal_handlers
-      trap 'INT' do
-        ::Process.kill 'TERM', $$
-      end
-
-      at_exit do
-        Yeb.logger.info 'shutting down...'
-        ::Process.kill 'TERM', -::Process.getpgrp # terminate all the children
-      end
     end
   end
 end

@@ -6,7 +6,17 @@ $:.unshift './lib'
 # TODO: sudo really needed?
 system("sudo ./bin/initd start") or raise "can't set FW forwarding"
 
+require 'yeb/logger'
 require 'yeb/server'
+
+trap 'INT' do
+  ::Process.kill 'TERM', $$
+end
+
+at_exit do
+  Yeb.logger.info 'shutting down...'
+  ::Process.kill 'TERM', -::Process.getpgrp # terminate all the children
+end
 
 dir = File.expand_path("~/.yeb")
 Yeb::Server.new(dir).start
