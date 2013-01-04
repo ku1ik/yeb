@@ -46,9 +46,9 @@ module Yeb
       i, o, e, @nginx_wait_thr = Open3.popen3(cmd)
 
       thread = Thread.new do
-        ::Process.wait(nginx_wait_thr[:pid])
-        # @nginx_wait_thr.value # wait for process to finish
+        @nginx_wait_thr.value # wait for process to finish
         Yeb.logger.error "nginx died"
+        exit 1
       end
     end
 
