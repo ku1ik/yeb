@@ -2,16 +2,6 @@
 
 set -e
 
-if [[ -f ~/.yebrc ]]; then
-  source ~/.yebrc
-fi
-
-cd $1
-
-if [[ -f .yebrc ]]; then
-  source .yebrc
-fi
-
 if [[ -z $WEB ]]; then
   if [[ -f Gemfile ]]; then
     runner="bundle exec"

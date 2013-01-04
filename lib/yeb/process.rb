@@ -1,14 +1,15 @@
 module Yeb
   class Process
-    attr_reader :command
+    attr_reader :command, :env
 
-    def initialize(command)
+    def initialize(command, env)
       @command = command
+      @env = env || {}
     end
 
     def start
       @stdin, @stdout, @stderr, @wait_thread =
-        Open3.popen3(command.env, command.command)
+        Open3.popen3(env, command)
 
       @stdin.close
     end

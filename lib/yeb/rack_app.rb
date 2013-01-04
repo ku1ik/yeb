@@ -1,11 +1,12 @@
 require 'socket'
 
 require 'yeb/socket_proxy'
-require 'yeb/command'
+require 'yeb/runner'
 require 'yeb/process'
 
 module Yeb
   class RackApp < SocketProxy
+    RACK_RUNNER_SCRIPT = File.expand_path('../../../scripts/rack-runner.sh', __FILE__)
     MAX_SPAWN_TIME = 60
 
     attr_reader :port
@@ -22,11 +23,11 @@ module Yeb
     def start
       Yeb.logger.info "spawning Rack app \"#{name}\" in #{path}"
 
-      process = Process.new(command)
-      process.start
+      runner = get_runner(RACK_RUNNER_SCRIPT, 'PORT' => port.to_s)
+      runner.run
 
       time_left = MAX_SPAWN_TIME
-      while time_left > 0 && process.alive? && !socket_ready?
+      while time_left > 0 && runner.process_alive? && !socket_ready?
         Yeb.logger.debug "waiting for port #{port} to accept connections"
         sleep 1
         time_left -= 1
@@ -35,13 +36,13 @@ module Yeb
       if time_left == 0
         Yeb.logger.error "app \"#{name}\" hasn't exposed working socket in " \
           "#{MAX_SPAWN_TIME} seconds, killing it"
-        process.stop
+        runner.kill_process
       end
 
       if socket_ready?
         Yeb.logger.debug "app \"#{name}\" is ready"
       else
-        raise RackAppStartFailedError.new(name, path, command, process.stdout, process.stderr, env, ruby)
+        raise RackAppStartFailedError.new(name, path, RACK_RUNNER_SCRIPT, runner.stdout, runner.stderr, env, ruby)
       end
     end
 
@@ -51,23 +52,21 @@ module Yeb
 
     private
 
-    def command
-      script = File.expand_path('../../../scripts/start-rack-app.sh', __FILE__)
-      Command.new("#{script} #{path}", :env => { 'PORT' => port.to_s })
-    end
-
     def env
-      command = Command.new("/usr/bin/env | sort")
-      process = Process.new(command)
-      process.start
-      (process.stdout + process.stderr).strip
+      runner = get_runner('/usr/bin/env | sort')
+      runner.run
+      runner.output
     end
 
     def ruby
-      command = Command.new("ruby -v")
-      process = Process.new(command)
-      process.start
-      (process.stdout + process.stderr).strip
+      runner = get_runner('ruby -v')
+      runner.run
+      runner.output
+    end
+
+    def get_runner(command, env = {})
+      env = { 'DIR' => path }.merge(env)
+      Runner.new(command, :env => env)
     end
   end
 
@@ -76,7 +75,7 @@ module Yeb
 
     def initialize(app_name, path, command, stdout, stderr, env, ruby)
       super(app_name, path)
-      @command = command.command
+      @command = command
       @stdout = stdout.strip
       @stderr = stderr.strip
       @env = env
