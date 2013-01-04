@@ -124,28 +124,15 @@ module Yeb
       nginx.remove_vhost_file(hostname.app_name)
     end
 
-    def stop
-      nginx.stop
-      exit
-    end
-
     def setup_signal_handlers
-      trap('INT') do
-        puts 'inting'
-        stop
+      trap 'INT' do
+        ::Process.kill 'TERM', $$
       end
 
-      trap('TERM') do
-        puts 'terming'
-        stop
+      at_exit do
+        Yeb.logger.info 'shutting down...'
+        ::Process.kill 'TERM', -::Process.getpgrp # terminate all the children
       end
-
-      trap('QUIT') do
-        puts 'quitting'
-        stop
-      end
-
-      # trap("HUP") { handle_hup }
     end
   end
 end
