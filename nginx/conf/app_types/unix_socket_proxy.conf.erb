@@ -6,13 +6,13 @@ server {
   # handle specific hostname requests
   server_name "<%= server_name %>";
 
-  root <%= apps_dir %>/<%= app_name %>/public;
+  root <%= apps_dir %>/<%= app_name %>;
 
   include _spawner.conf;
 
   location / {
     include _check_root.conf;
-    try_files $uri $uri/index.html $uri.html @app;
+    try_files $uri/fail @app;
   }
 
   location @app {
