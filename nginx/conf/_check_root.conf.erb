@@ -1,0 +1,6 @@
+# vim:ft=nginx
+
+# return 410 (Gone) if document_root is no longer available (user removed symlink)
+if (!-d $document_root) {
+  return 410;
+}

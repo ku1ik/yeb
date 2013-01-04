@@ -11,12 +11,7 @@ server {
   include _spawner.conf;
 
   location / {
-    error_page 418 = @spawner;
-
-    if (!-d $document_root) {
-      return 418;
-    }
-
+    include _check_root.conf;
     try_files $uri $uri/index.html $uri.html =404;
   }
 

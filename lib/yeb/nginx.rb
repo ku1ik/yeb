@@ -92,6 +92,7 @@ module Yeb
       write_config_file('default.conf')
       write_config_file('yeb.conf')
       write_config_file('_spawner.conf')
+      write_config_file('_check_root.conf')
       write_config_file('nginx.conf')
     end
 
