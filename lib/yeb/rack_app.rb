@@ -41,7 +41,7 @@ module Yeb
       if socket_ready?
         Yeb.logger.debug "app \"#{name}\" is ready"
       else
-        raise AppStartFailedError.new(name, path, command, process.stdout, process.stderr, env)
+        raise RackAppStartFailedError.new(name, path, command, process.stdout, process.stderr, env, ruby)
       end
     end
 
@@ -62,17 +62,25 @@ module Yeb
       process.start
       (process.stdout + process.stderr).strip
     end
+
+    def ruby
+      command = Command.new("ruby -v")
+      process = Process.new(command)
+      process.start
+      (process.stdout + process.stderr).strip
+    end
   end
 
-  class AppStartFailedError < AppConnectError
-    attr_reader :command, :stdout, :stderr, :env
+  class RackAppStartFailedError < AppConnectError
+    attr_reader :command, :stdout, :stderr, :env, :ruby
 
-    def initialize(app_name, path, command, stdout, stderr, env)
+    def initialize(app_name, path, command, stdout, stderr, env, ruby)
       super(app_name, path)
       @command = command.command
       @stdout = stdout.strip
       @stderr = stderr.strip
       @env = env
+      @ruby = ruby
     end
   end
 end
