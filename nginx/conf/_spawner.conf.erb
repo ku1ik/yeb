@@ -6,4 +6,5 @@ location @spawner {
   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
   proxy_set_header Host $http_host;
   proxy_pass http://unix:<%= yeb_socket_path %>;
+  add_header X-Yeb 1;
 }
