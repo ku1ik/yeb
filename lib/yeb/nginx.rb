@@ -8,14 +8,15 @@ require 'yeb/hostname'
 
 module Yeb
   class NGiNX
-    HTTP_PORT = 30666
-    HTTPS_PORT = 30667
+    attr_reader :dir, :http_port, :https_port, :yeb_socket_path, :bin_path,
+      :vhosts_dir, :static_assets_dir
 
-    attr_reader :dir, :yeb_socket_path, :bin_path, :vhosts_dir, :static_assets_dir
     attr_accessor :last_vhosts_dir_digest
 
-    def initialize(dir, yeb_socket_path)
+    def initialize(dir, http_port, https_port, yeb_socket_path)
       @dir = dir
+      @http_port = http_port
+      @https_port = https_port
       @yeb_socket_path = yeb_socket_path
       @bin_path = "#{dir}/sbin/nginx"
       @vhosts_dir = "#{dir}/conf/vhosts"
@@ -107,6 +108,8 @@ module Yeb
 
     def add_vhost_file(vhost_name, app_type, context)
       Yeb.logger.debug "adding nginx vhost for \"#{vhost_name}\""
+
+      context = context.merge(:http_port => http_port)
 
       data = ERBTemplate.render("nginx/conf/app_types/#{app_type}.conf.erb", context)
       File.open(vhost_file_path(vhost_name), 'w') do |f|

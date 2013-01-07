@@ -20,5 +20,8 @@ at_exit do
   ::Process.kill 'TERM', -::Process.getpgrp # terminate all the children
 end
 
-dir = File.expand_path("~/.yeb")
-Yeb::Server.new(dir).start
+dir = File.expand_path(ENV['YEB_DIR'] || "~/.yeb")
+http_port  = (ENV['YEB_HTTP_PORT']  || 30666).to_i
+https_port = (ENV['YEB_HTTPS_PORT'] || 30667).to_i
+
+Yeb::Server.new(dir, http_port, https_port).start

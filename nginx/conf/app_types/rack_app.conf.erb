@@ -1,7 +1,7 @@
 # vim:ft=nginx
 
 server {
-  listen <%= Yeb::NGiNX::HTTP_PORT %>;
+  listen <%= http_port %>;
 
   # handle specific hostname requests
   server_name "<%= server_name %>";

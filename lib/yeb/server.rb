@@ -14,11 +14,11 @@ module Yeb
   class Server
     attr_reader :socket_path, :apps_dir, :app_manager, :nginx
 
-    def initialize(dir)
+    def initialize(dir, http_port, https_port)
       @socket_path = "#{dir}/._.sock"
       @apps_dir = dir
       @app_manager = AppManager.new(apps_dir)
-      @nginx = NGiNX.new("#{dir}/.nginx", socket_path)
+      @nginx = NGiNX.new("#{dir}/.nginx", http_port, https_port, socket_path)
     end
 
     def start
