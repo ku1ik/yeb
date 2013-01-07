@@ -4,7 +4,9 @@
 $:.unshift './lib'
 
 # TODO: sudo really needed?
-system("sudo ./bin/initd start") or raise "can't set FW forwarding"
+unless ENV['YEB_SKIP_FW']
+  system("sudo ./bin/initd start") or raise "can't set FW forwarding"
+end
 
 require 'yeb/logger'
 require 'yeb/server'
