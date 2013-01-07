@@ -11,7 +11,10 @@ server {
   include _spawner.conf;
 
   location / {
-    include _check_root.conf;
+    if (!-e <%= apps_dir %>/<%= app_name %>/config.ru) {
+      return 410;
+    }
+
     try_files $uri $uri/index.html $uri.html @app;
   }
 
