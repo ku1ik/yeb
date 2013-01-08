@@ -20,8 +20,12 @@ module Yeb
         filename = "#{path}/#{req.path}"
       end
 
-      if File.exist?(filename)
+      if File.file?(filename)
         [200, File.read(filename)]
+      elsif File.file?(filename + '.html')
+        [200, File.read(filename + '.html')]
+      elsif File.file?(filename + 'index.html')
+        [200, File.read(filename + 'index.html')]
       else
         [404, "#{req.path} not found"]
       end
