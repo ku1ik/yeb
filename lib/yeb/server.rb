@@ -84,6 +84,7 @@ module Yeb
       response = [502, body]
 
     rescue => e
+      Yeb.logger.error(([e.message] + e.backtrace).join("\n"))
       body = Template.render(:unknown_error, { :exception => e })
       response = [500, body]
 
