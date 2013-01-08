@@ -11,6 +11,8 @@ end
 require 'yeb/logger'
 require 'yeb/server'
 
+::Process.setpgid($$, $$)
+
 trap 'INT' do
   ::Process.kill 'TERM', $$
 end
