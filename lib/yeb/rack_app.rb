@@ -23,11 +23,11 @@ module Yeb
     def start
       Yeb.logger.info "spawning Rack app \"#{name}\" in #{path}"
 
-      runner = get_runner(RACK_RUNNER_SCRIPT, 'PORT' => port.to_s)
-      runner.run
+      @runner = get_runner(RACK_RUNNER_SCRIPT, 'PORT' => port.to_s)
+      @runner.run
 
       time_left = MAX_SPAWN_TIME
-      while time_left > 0 && runner.process_alive? && !socket_ready?
+      while time_left > 0 && @runner.process_alive? && !socket_ready?
         Yeb.logger.debug "waiting for port #{port} to accept connections"
         sleep 1
         time_left -= 1
@@ -36,14 +36,27 @@ module Yeb
       if time_left == 0
         Yeb.logger.error "app \"#{name}\" hasn't exposed working socket in " \
           "#{MAX_SPAWN_TIME} seconds, killing it"
-        runner.kill_process
+        @runner.kill_process
       end
 
       if socket_ready?
         Yeb.logger.debug "app \"#{name}\" is ready"
       else
-        raise RackAppStartFailedError.new(name, path, RACK_RUNNER_SCRIPT, runner.stdout, runner.stderr, env, ruby)
+        raise RackAppStartFailedError.new(name, path, RACK_RUNNER_SCRIPT, @runner.stdout, @runner.stderr, env, ruby)
       end
+    end
+
+    def dispose
+      Yeb.logger.info "killing app \"#{name}\""
+      @runner.kill_process
+    end
+
+    def restart_requested?
+      File.exist?("#{path}/tmp/restart.txt")
+    end
+
+    def clean_restart_request_state
+      FileUtils.rm_rf("#{path}/tmp/restart.txt")
     end
 
     def vhost_context

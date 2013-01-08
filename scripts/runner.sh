@@ -12,6 +12,4 @@ if [[ -f .yebrc ]]; then
   source .yebrc
 fi
 
-cd . >/dev/null 2>&1
-
 exec "$@"

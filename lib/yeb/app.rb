@@ -28,6 +28,14 @@ module Yeb
     def vhost_context
       { :path => path }
     end
+
+    def restart_requested?
+      false
+    end
+
+    def clean_restart_request_state
+      # no op
+    end
   end
 
   class NotImplementedError < StandardError; end

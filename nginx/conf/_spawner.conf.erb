@@ -1,6 +1,6 @@
 # vim:ft=nginx
 
-error_page 410 = @spawner;
+error_page 410 418 = @spawner;
 
 location @spawner {
   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

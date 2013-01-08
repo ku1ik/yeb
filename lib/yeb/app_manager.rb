@@ -18,8 +18,12 @@ module Yeb
     def get_app(hostname)
       if name = get_app_name(hostname)
         if app = apps[name]
-          # probably it's dead or socket not responding
-          unless app.alive?
+          if app.restart_requested?
+            Yeb.logger.info "restarting app \"#{name}\""
+            app.clean_restart_request_state
+            app.dispose
+            apps.delete(name)
+          elsif !app.alive?  # probably dead or socket not responding
             Yeb.logger.info "removing dead app \"#{name}\""
             app.dispose
             apps.delete(name)

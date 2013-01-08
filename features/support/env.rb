@@ -34,7 +34,8 @@ def start_server
   env = {
     'YEB_HTTP_PORT' => YEB_HTTP_PORT.to_s,
     'YEB_HTTPS_PORT' => YEB_HTTPS_PORT.to_s,
-    'YEB_DIR' => dir
+    'YEB_DIR' => dir,
+    'RUBYOPT' => '' # clear what bundler set
   }
 
   log_file = "#{dir}/yeb.log"

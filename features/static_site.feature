@@ -1,4 +1,4 @@
-Feature: Static site
+Feature: Static site serving
   In order to work on my static site
   As a developer
   I want to be able to serve it by symlinking site directory
