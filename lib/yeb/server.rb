@@ -96,6 +96,11 @@ module Yeb
           response_text = Response.new do |r|
             r.status = response[0]
             r.body = response[1]
+
+            if r.status >= 400
+              r['X-Yeb'] = 1
+            end
+
           end.to_s
         else
           response_text = response.to_s
