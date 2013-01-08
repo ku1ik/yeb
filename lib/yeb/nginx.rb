@@ -56,6 +56,7 @@ module Yeb
     def reload
       Yeb.logger.info 'reloading nginx'
       ::Process.kill('HUP', @nginx_wait_thr.pid)
+      wait_for_new_worker
     end
 
     def reload_if_needed
@@ -63,6 +64,22 @@ module Yeb
       if current_vhosts_dir_digest != last_vhosts_dir_digest
         self.last_vhosts_dir_digest = current_vhosts_dir_digest
         reload
+      end
+    end
+
+    def wait_for_new_worker
+      n = 10
+
+      while n > 0
+        out = `ps --ppid #{@nginx_wait_thr.pid} -o pid`
+        worker_num = out.split("\n").select { |line| line =~ /^\d+$/ }.size
+
+        if worker_num > 1
+          break
+        end
+
+        sleep 0.2
+        n -= 1
       end
     end
 
