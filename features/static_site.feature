@@ -85,3 +85,4 @@ Feature: Static site
     And I request http://foo.dev/
     Then I get status 404
     And I get text /ln -s/
+    And it touches spawner
