@@ -2,14 +2,10 @@
 
 set -e
 
-cd $DIR >/dev/null 2>&1
+cd $DIR
 
 if [[ -f ~/.yebrc ]]; then
   source ~/.yebrc
 fi
 
-if [[ -f .yebrc ]]; then
-  source .yebrc
-fi
-
-exec "$@"
+exec ./.yebrc

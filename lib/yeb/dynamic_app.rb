@@ -1,13 +1,12 @@
 require 'socket'
 
 require 'yeb/socket_proxy'
-require 'yeb/runner'
 require 'yeb/process'
 
 module Yeb
-  class RackApp < SocketProxy
-    RACK_RUNNER_SCRIPT = File.expand_path('../../../scripts/rack-runner.sh', __FILE__)
+  class DynamicApp < SocketProxy
     MAX_SPAWN_TIME = 60
+    RUNNER_SCRIPT = File.expand_path('../../../scripts/runner.sh', __FILE__)
 
     attr_reader :port
 
@@ -21,13 +20,15 @@ module Yeb
     end
 
     def start
-      Yeb.logger.info "spawning Rack app \"#{name}\" in #{path}"
+      Yeb.logger.info "spawning app \"#{name}\" in #{path}"
 
-      @runner = get_runner(RACK_RUNNER_SCRIPT, 'PORT' => port.to_s)
-      @runner.run
+      env = { 'DIR' => path, 'PORT' => port.to_s }
+      command = "#{path}/.yebrc"
+      @process = Process.new(RUNNER_SCRIPT, env)
+      @process.start
 
       time_left = MAX_SPAWN_TIME
-      while time_left > 0 && @runner.process_alive? && !socket_ready?
+      while time_left > 0 && @process.alive? && !socket_ready?
         Yeb.logger.debug "waiting for port #{port} to accept connections"
         sleep 1
         time_left -= 1
@@ -36,19 +37,19 @@ module Yeb
       if time_left == 0
         Yeb.logger.error "app \"#{name}\" hasn't exposed working socket in " \
           "#{MAX_SPAWN_TIME} seconds, killing it"
-        @runner.kill_process
+        @process.stop
       end
 
       if socket_ready?
         Yeb.logger.debug "app \"#{name}\" is ready"
       else
-        raise RackAppStartFailedError.new(name, path, RACK_RUNNER_SCRIPT, @runner.stdout, @runner.stderr, env, ruby)
+        raise DynamicAppStartFailedError.new(name, path, @process.stdout, @process.stderr)
       end
     end
 
     def dispose
       Yeb.logger.info "killing app \"#{name}\""
-      @runner.kill_process
+      @process.stop
     end
 
     def restart_requested?
@@ -62,37 +63,15 @@ module Yeb
     def vhost_context
       super.merge({ :port => port })
     end
-
-    private
-
-    def env
-      runner = get_runner('/usr/bin/env | sort')
-      runner.run
-      runner.output
-    end
-
-    def ruby
-      runner = get_runner('ruby -v')
-      runner.run
-      runner.output
-    end
-
-    def get_runner(command, env = {})
-      env = { 'DIR' => path }.merge(env)
-      Runner.new(command, :env => env)
-    end
   end
 
-  class RackAppStartFailedError < AppConnectError
-    attr_reader :command, :stdout, :stderr, :env, :ruby
+  class DynamicAppStartFailedError < AppConnectError
+    attr_reader :stdout, :stderr
 
-    def initialize(app_name, path, command, stdout, stderr, env, ruby)
+    def initialize(app_name, path, stdout, stderr)
       super(app_name, path)
-      @command = command
       @stdout = stdout.strip
       @stderr = stderr.strip
-      @env = env
-      @ruby = ruby
     end
   end
 end

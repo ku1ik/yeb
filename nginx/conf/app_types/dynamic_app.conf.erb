@@ -11,7 +11,7 @@ server {
   include _spawner.conf;
 
   location / {
-    if (!-e <%= apps_dir %>/<%= app_name %>/config.ru) {
+    if (!-e <%= apps_dir %>/<%= app_name %>/.yebrc) {
       return 410;
     }
 

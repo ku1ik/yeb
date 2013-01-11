@@ -1,4 +1,4 @@
-require 'yeb/rack_app'
+require 'yeb/dynamic_app'
 require 'yeb/tcp_socket_proxy'
 require 'yeb/unix_socket_proxy'
 require 'yeb/static_site'
@@ -50,8 +50,8 @@ module Yeb
       end
 
       if File.directory?(real_path)
-        if File.exist?("#{real_path}/config.ru")
-          app = RackApp.new(name, real_path, next_available_port)
+        if File.exist?("#{real_path}/.yebrc")
+          app = DynamicApp.new(name, real_path, next_available_port)
           app.start
           @next_available_port += 1
         elsif File.exist?("#{real_path}/index.html")
